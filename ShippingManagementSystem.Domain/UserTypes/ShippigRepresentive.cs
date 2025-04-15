@@ -14,8 +14,7 @@ namespace ShippingManagementSystem.Domain.UserTypes
         public string UserID { get; set; }
         public virtual ApplicationUser User { get; set; }
         public virtual List<ShippingRepGovernorate>? ShippingRepGovernorates { get; set; }= new List<ShippingRepGovernorate>();
-        //public virtual List<Order>? ShippigRepresentativeOrders { get; } = new List<Order>();
-
+        public virtual List<Order>? ShippigRepresentativeOrders { get; } = new List<Order>();
     }
 
 }

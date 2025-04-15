@@ -32,6 +32,7 @@ namespace ShippingManagementSystem.Application.UnitOfWork
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IOptions<JWT> _jwt;
         private readonly IOptions<EmailConfiguration> _emailSettings;
+        private readonly IOptions<AdminLogin> _adminLogin;
 
         #region Services
 
@@ -65,7 +66,7 @@ namespace ShippingManagementSystem.Application.UnitOfWork
             {
                 if (_authenticationService != null)
                     return _authenticationService;
-                return new AuthenticationServices(_userManager,_jwt,this);
+                return new AuthenticationServices(_userManager,_jwt,this,_adminLogin);
             }
         }
 

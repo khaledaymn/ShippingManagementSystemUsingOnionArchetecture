@@ -12,8 +12,10 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Emp
 {
     public class EmployeeSpecification : BaseSpecification<Employee>
     {
+
         public EmployeeSpecification(EmployeeParams param)
         {
+            Criteria = m => !m.User.IsDeleted;
             ArgumentNullException.ThrowIfNull(param);
 
             Criteria = e =>

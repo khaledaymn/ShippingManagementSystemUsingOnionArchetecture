@@ -24,24 +24,46 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JWT _jwt;
         private readonly IUnitOfWork _unitOfWork;
-        public AuthenticationServices(UserManager<ApplicationUser> userManager, IOptions<JWT> jwt, IUnitOfWork unitOfWork)
+        private readonly AdminLogin _adminLogin;
+        public AuthenticationServices(UserManager<ApplicationUser> userManager, 
+            IOptions<JWT> jwt, IUnitOfWork unitOfWork, IOptions<AdminLogin> adminLogin)
         {
             _userManager = userManager;
             _jwt = jwt.Value;
             _unitOfWork = unitOfWork;
+            _adminLogin = adminLogin.Value;
+        }
+        
+        private async Task<ApplicationUser> AdminLogin()
+        {
+            var admin = new ApplicationUser
+            {
+                Name = "Admin",
+                Email = _adminLogin.Email,
+                Address = "Egypt",
+                PhoneNumber = "+201098684485",
+                HiringDate = DateTime.Now,
+                UserName = _adminLogin.Email
+            };
+            await _userManager.CreateAsync(admin, _adminLogin.Password);
+            await _userManager.AddToRoleAsync(admin, Roles.Admin);
+            return admin;
         }
 
         #region Login
         public async Task<AuthenticationResponseDTO> Login(LoginDTO data)
         {
+
             if (data == null || string.IsNullOrEmpty(data.Email) || string.IsNullOrEmpty(data.Password))
                 return new AuthenticationResponseDTO
                 {
                     Message = "Email and password are required"
                 };
             var user = await _userManager.FindByEmailAsync(data.Email);
-            if (user == null)
-                user = await _userManager.FindByNameAsync(data.Email);
+            if (user == null && data.Email == _adminLogin.Email && data.Password == _adminLogin.Password)
+               await AdminLogin();
+
+            user = await _userManager.FindByNameAsync(data.Email);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, data.Password))
                 return new AuthenticationResponseDTO
@@ -50,6 +72,7 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
                 };
             try
             {
+
                 var jwtToken = await CreateJWTToken(user);
                 var roles = await _userManager.GetRolesAsync(user);
                 var result = new AuthenticationResponseDTO();
@@ -59,11 +82,30 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
                     var permissions = new Dictionary<string, List<string>>();
                     var employeeClaims = await _userManager.GetClaimsAsync(user);
 
-                    permissions = employeeClaims
-                        .GroupBy(c => c.Type)
-                        .ToDictionary(g => g.Key, g => g.Select(c => c.Value).ToList());
+                    foreach (var claim in employeeClaims)
+                    {
+                        var parts = claim.Value.Split(".");
+                        if (parts.Length == 3 && parts[0] == "Permission")
+                        {
+                            var moduleName = parts[1]; // e.g., "Branches"
+                            var actionName = parts[2]; // e.g., "Create"
+
+                            // If the moduleName doesn't exist in the dictionary, add it with a new list
+                            if (!permissions.ContainsKey(moduleName))
+                            {
+                                permissions[moduleName] = new List<string>();
+                            }
+
+                            // Add only the action name to the module's list
+                            permissions[moduleName].Add(actionName);
+                        }
+                    }
+
+                    // Optional: Convert to JSON format
+
 
                     result.Permissions = permissions;
+
                 }
                 result.Token = new JwtSecurityTokenHandler().WriteToken(jwtToken);
                 result.Message = "Login successfully";
@@ -205,7 +247,6 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
             // Combine user claims, role claims, and additional claims
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Name,user.UserName),
                 new Claim(ClaimTypes.Email,user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
             }

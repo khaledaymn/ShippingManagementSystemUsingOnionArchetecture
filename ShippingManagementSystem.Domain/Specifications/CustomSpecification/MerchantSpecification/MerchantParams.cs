@@ -4,8 +4,8 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Mer
 {
     public class MerchantParams
     {
-        private const int MaxPageSize = 10;
-        private int _pageSize = 10;
+        private const int MaxPageSize = 100;
+        private int _pageSize = 100;
         
         public int PageIndex { get; set; } = 1;
         

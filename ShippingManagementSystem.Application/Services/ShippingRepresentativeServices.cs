@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using ShippingManagementSystem.Application.Helpers;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs;
 using ShippingManagementSystem.Domain.DTOs.ShippingRepresentativeDTOs;
@@ -51,7 +52,7 @@ namespace ShippingManagementSystem.Application.Services
                         var errors = string.Join("; ", result.Errors.Select(e => e.Description));
                         return (false, $"Create failed: {errors}");
                     }
-
+                    await _userManager.AddToRoleAsync(newUser, Roles.ShippingRepresentative);
                     var shippingRep = new ShippigRepresentative
                     {
                         UserID = newUser.Id,
@@ -173,12 +174,15 @@ namespace ShippingManagementSystem.Application.Services
                     {
                         foreach (var govId in dto.GovernorateIds)
                         {
-                            var newGov = new ShippingRepGovernorate
+                            if(!_unit.Repository<ShippingRepGovernorate>().Any(g => g.GovernorateId == govId && g.ShippingRepId == dto.Id))
                             {
-                                ShippingRepId = dto.Id,
-                                GovernorateId = govId
-                            };
-                            await _unit.Repository<ShippingRepGovernorate>().Add(newGov);
+                                var newGov = new ShippingRepGovernorate
+                                {
+                                    ShippingRepId = dto.Id,
+                                    GovernorateId = govId
+                                };
+                                await _unit.Repository<ShippingRepGovernorate>().Add(newGov);
+                            }
                         }
                     }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace ShippingManagementSystem.Web.Controllers
 {
+    [EnableCors("AllowOrigins")]
     [Route("[controller]")]
     [ApiController]
     public class AccountsController : ControllerBase
@@ -73,6 +75,7 @@ namespace ShippingManagementSystem.Web.Controllers
         ///   "error": "Exception details here"
         /// }
         /// </response>
+        
         [HttpPost]
         [Route("~/Account/Login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO model)
@@ -88,19 +91,12 @@ namespace ShippingManagementSystem.Web.Controllers
                 {
                     return BadRequest(result.Message);
                 }
-                var permission = result.Permissions?.Select(x => new
+                var permissionList = result.Permissions.Select(p => new
                 {
-                    Name = x.Key,
-                    Values = x.Value
-                });
-                return Ok(new
-                {
-                    result.Id,
-                    result.Message,
-                    result.Token,
-                    result.Role,
-                    permission
-                });
+                    name = p.Key,
+                    values = p.Value
+                }).ToList();
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -109,6 +105,7 @@ namespace ShippingManagementSystem.Web.Controllers
         }
 
         #endregion
+
 
         #region Forget Password
         /// <summary>
@@ -190,6 +187,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         #endregion
 
+
         #region Reset Password
         /// <summary>
         /// Resets a user's password using the provided reset token and new password.
@@ -269,6 +267,7 @@ namespace ShippingManagementSystem.Web.Controllers
         }
 
         #endregion
+
 
         #region Change Password
 

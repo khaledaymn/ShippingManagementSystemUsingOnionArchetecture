@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ShippingManagementSystem.Domain.Entities
 {
-    [PrimaryKey(nameof(MeduleId),nameof(GroupId))]
+    [PrimaryKey(nameof(MeduleId),nameof(GroupId),nameof(Permission))]
     public class GroupMedule
     {
         public Permission Permission { get; set; }

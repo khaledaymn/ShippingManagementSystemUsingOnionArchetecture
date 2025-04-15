@@ -10,7 +10,8 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Shi
         {
             // Apply filtering
             Expression<Func<ShippigRepresentative, bool>> searchCriteria = null;
-            
+            Criteria = m => !m.User.IsDeleted;
+
             if (!string.IsNullOrEmpty(param.Search))
             {
                 searchCriteria = sr => 

@@ -4,8 +4,8 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Shi
 {
     public class ShippingRepresentativeParams
     {
-        private const int MaxPageSize = 50;
-        private int _pageSize = 10;
+        private const int MaxPageSize = 100;
+        private int _pageSize = 100;
         
         public int PageIndex { get; set; } = 1;
         

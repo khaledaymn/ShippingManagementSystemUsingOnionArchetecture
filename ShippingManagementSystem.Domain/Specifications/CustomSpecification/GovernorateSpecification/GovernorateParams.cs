@@ -8,11 +8,11 @@ namespace ShippingManagementSystem.Domain.Specifications.GovernorateSpecificatio
         public bool? IsDeleted { get; set; }
         public string? Sort { get; set; }
         public int PageIndex { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
+        public int PageSize { get; set; } = 100;
 
         public GovernorateParams()
         {
-            PageSize = Math.Clamp(PageSize, 1, 10);
+            PageSize = Math.Clamp(PageSize, 1, 100);
         }
     }
 } 

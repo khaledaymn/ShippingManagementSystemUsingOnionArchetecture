@@ -37,16 +37,17 @@ namespace ShippingManagementSystem.Domain.Services
         {
             if (dto == null || string.IsNullOrEmpty(dto.Email))
                 return (false, "Invalid employee data.");
-
+            var random = new Random();
+            var randomNumber = random.Next(00,99);
             var newUser = new ApplicationUser
             {
                 Name = dto.Name,
-                UserName = dto.Name.Replace(" ",""),
+                UserName = _userManager.FindByNameAsync(dto.Name.Replace(" ","")).Result is not null ? dto.Name.Replace(" ", "")+randomNumber : dto.Name.Replace(" ",""),
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
                 IsDeleted = false,
                 HiringDate = DateTime.Now,
-
+                Address = "Cairo"
             };
 
             using (var transaction = await _unit.BeginTransactionAsync())
@@ -60,7 +61,8 @@ namespace ShippingManagementSystem.Domain.Services
                         var errors = string.Join("; ", result.Errors.Select(e => e.Description));
                         return (false, $"Create failed: {errors}");
                     }
-                    if(dto.GroupId == null)
+                    await _userManager.AddToRoleAsync(newUser, Roles.Employee);
+                    if (dto.GroupId == null)
                     {
                         _unit.RollbackAsync();
                         return (false, "Group is required.");

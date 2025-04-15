@@ -18,6 +18,6 @@ namespace ShippingManagementSystem.Domain.Entities
         [ForeignKey("City")]
         public int CityId { get; set; }
         public virtual City? City { get; set; }
-        //public virtual List<Order>? BranchOrder { get; } = new List<Order>();
+        public virtual List<Order>? BranchOrder { get; } = new List<Order>();
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using ShippingManagementSystem.Application.Helpers;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs;
 using ShippingManagementSystem.Domain.DTOs.MerchantDTOs;
@@ -51,7 +52,7 @@ namespace ShippingManagementSystem.Application.Services
                         var errors = string.Join("; ", result.Errors.Select(e => e.Description));
                         return (false, $"Create failed: {errors}");
                     }
-
+                    await _userManager.AddToRoleAsync(newUser, Roles.Merchant);
                     var merchant = new Merchant
                     {
                         UserID = newUser.Id,

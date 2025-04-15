@@ -8,14 +8,15 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Mer
     {
         public MerchantSpecification(MerchantParams param) : base()
         {
+            Criteria = m => !m.User.IsDeleted;
             // Apply filtering
             if (!string.IsNullOrEmpty(param.Search))
             {
-                Criteria = m => 
+                Criteria =(m =>
                     m.User.Name.Contains(param.Search) ||
                     m.StoreName.Contains(param.Search) ||
                     m.User.Email.Contains(param.Search) ||
-                    m.User.PhoneNumber.Contains(param.Search);
+                    m.User.PhoneNumber.Contains(param.Search));
             }
             
             // Apply sorting

@@ -103,24 +103,24 @@ namespace ShippingManagementSystem.Application.Services
                     CreationDate = DateTime.Now
                 };
 
-                _unitOfWork.Repository<Group>().Add(group);
+                await _unitOfWork.Repository<Group>().Add(group);
                 await _unitOfWork.Save();
-
+                var id = group.Id;
                 foreach (var item in groupDTO.Permissions)
                 {
                     foreach (var value in item.Values) 
                     { 
                         var groupMedule = new GroupMedule
                         {
-                            GroupId = group.Id,
+                            GroupId = id,
                             MeduleId = item.Id,
                             Permission = (Permission)value
                         };
+                        await _unitOfWork.Repository<GroupMedule>().Add(groupMedule);
                     }
                 }
 
-                await _unitOfWork.Repository<GroupMedule>().AddRange(group.GroupMedules);
-                _unitOfWork.Save();
+                await _unitOfWork.Save();
 
                 await _unitOfWork.CommitAsync();
                 return (true, $"Group '{group.Name}' created successfully");
