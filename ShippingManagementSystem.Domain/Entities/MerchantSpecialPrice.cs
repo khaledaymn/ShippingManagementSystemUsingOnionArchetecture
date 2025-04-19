@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Shipping_Project.DTOs;
 using ShippingManagementSystem.Domain.UserTypes;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,16 @@ namespace ShippingManagementSystem.Domain.Entities
     [PrimaryKey(nameof(MerchantId), nameof(CityId))]
     public class MerchantSpecialPrice
     {
+        public MerchantSpecialPrice()
+        {
+
+        }
+        public MerchantSpecialPrice(string Merchantid, SpecialDeliveryPriceForMerchant sp)
+        {
+            this.MerchantId = Merchantid;
+            this.CityId = sp.cityId;
+            this.SpecialPrice = sp.SpecialPreice;
+        }
         public double SpecialPrice { get; set; }
         [ForeignKey("Merchant")]
         public string MerchantId { get; set; }
