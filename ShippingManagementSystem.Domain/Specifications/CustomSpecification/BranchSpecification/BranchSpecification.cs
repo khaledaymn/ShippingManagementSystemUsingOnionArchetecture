@@ -48,5 +48,6 @@ namespace ShippingManagementSystem.Domain.Specifications.BranchSpecification
         {
             // Constructor for getting branch by ID
         }
+        
     }
 } 

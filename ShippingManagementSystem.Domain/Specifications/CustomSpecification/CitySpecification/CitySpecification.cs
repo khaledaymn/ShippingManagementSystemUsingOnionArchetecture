@@ -57,5 +57,6 @@ namespace ShippingManagementSystem.Domain.Specifications.CitySpecification
         {
             // Constructor for getting city by ID
         }
+       
     }
 } 

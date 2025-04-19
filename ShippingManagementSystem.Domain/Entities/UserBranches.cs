@@ -4,9 +4,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ShippingManagementSystem.Domain.Entities
 {
+
     [PrimaryKey(nameof(UserId),nameof(BranchId))]
     public class UserBranches
     {
+        public UserBranches()
+        {
+            
+        }
+        public UserBranches(string userid, int branchid)
+        {
+            this.UserId = userid;
+            this.BranchId = branchid;
+        }
         [ForeignKey("User")]
         public string UserId { get; set; }
         [ForeignKey("Branches")]

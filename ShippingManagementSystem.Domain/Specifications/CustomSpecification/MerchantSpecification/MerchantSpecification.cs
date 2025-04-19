@@ -8,7 +8,7 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Mer
     {
         public MerchantSpecification(MerchantParams param) : base()
         {
-            Criteria = m => !m.User.IsDeleted;
+           
             // Apply filtering
             if (!string.IsNullOrEmpty(param.Search))
             {

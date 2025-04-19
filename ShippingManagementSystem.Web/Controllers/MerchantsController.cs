@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Shipping_Project.DTOs.MerchantDtos;
 using ShippingManagementSystem.Application.UnitOfWork;
-using ShippingManagementSystem.Domain.DTOs.MerchantDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
 using ShippingManagementSystem.Domain.Specifications.CustomSpecification.MerchantSpecification;
 
@@ -22,7 +22,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Merchants/GetAll")]
-        public async Task<ActionResult<IReadOnlyList<MerchantDTO>>> GetAll([FromQuery] MerchantParams param)
+        public async Task<ActionResult<IReadOnlyList<GovernoratePaginationForCount<MerchantDTO>>>> GetAll([FromQuery] MerchantParams param)
         {
             try
             {
@@ -41,7 +41,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/Merchants/Add")]
-        public async Task<ActionResult> Add(AddMerchantDTO dto)
+        public async Task<ActionResult> Add(MerchantDtoForAdding dto)
         {
             try
             {
@@ -60,13 +60,15 @@ namespace ShippingManagementSystem.Web.Controllers
             }
         }
 
+
+
         #endregion
 
         #region Update Merchant
 
         [HttpPut]
         [Route("~/Merchants/Update")]
-        public async Task<ActionResult> Update(UpdateMerchantDTO dto)
+        public async Task<ActionResult> Update(MerchecntForEditingAndGetting dto)
         {
             try
             {
@@ -113,7 +115,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Merchants/GetById/{id}")]
-        public async Task<ActionResult<MerchantDTO>> GetById(string id)
+        public async Task<ActionResult<MerchecntForEditingAndGetting>> GetById(string id)
         {
             try
             {
