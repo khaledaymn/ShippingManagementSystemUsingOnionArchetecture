@@ -213,32 +213,27 @@ namespace ShippingManagementSystem.Application.Services
             if (shippingRep == null)
                 return (false, "Shipping representative not found.");
 
-            using (var transaction = await _unit.BeginTransactionAsync())
+
+            try
             {
-                try
+                // Soft delete the user
+                var user = shippingRep.User;
+                user.IsDeleted = !user.IsDeleted;
+                var userUpdateResult = await _userManager.UpdateAsync(user);
+
+                if (!userUpdateResult.Succeeded)
                 {
-                    // Soft delete the user
-                    var user = shippingRep.User;
-                    user.IsDeleted = true;
-                    var userUpdateResult = await _userManager.UpdateAsync(user);
-
-                    if (!userUpdateResult.Succeeded)
-                    {
-                        await transaction.RollbackAsync();
-                        var errors = string.Join("; ", userUpdateResult.Errors.Select(e => e.Description));
-                        return (false, $"Delete failed: {errors}");
-                    }
-
-                    await _unit.Save();
-                    await transaction.CommitAsync();
-
-                    return (true, "Shipping representative deleted successfully.");
+                    var errors = string.Join("; ", userUpdateResult.Errors.Select(e => e.Description));
+                    return (false, $"Delete failed: {errors}");
                 }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    return (false, $"An error occurred: {ex.Message}");
-                }
+
+                await _unit.Save();
+
+                return (true, "Shipping representative deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"An error occurred: {ex.Message}");
             }
         }
         #endregion

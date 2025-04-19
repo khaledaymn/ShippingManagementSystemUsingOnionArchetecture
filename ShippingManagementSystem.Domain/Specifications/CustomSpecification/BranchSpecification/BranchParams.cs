@@ -10,11 +10,11 @@ namespace ShippingManagementSystem.Domain.Specifications.BranchSpecification
         public bool? IsDeleted { get; set; }
         public string? Sort { get; set; }
         public int PageIndex { get; set; } = 1;
-        public int PageSize { get; set; } = 100;
+        public int PageSize { get; set; } = 10;
 
         public BranchParams()
         {
-            PageSize = Math.Clamp(PageSize, 1, 100);
+            PageSize = Math.Clamp(PageSize, 1, 10);
         }
     }
 } 

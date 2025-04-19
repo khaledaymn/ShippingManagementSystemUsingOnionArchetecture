@@ -253,13 +253,14 @@ namespace ShippingManagementSystem.Application.UnitOfWork
 
 
         #region Constructor
-        public UnitOfWork(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IOptions<JWT> jwt, IOptions<EmailConfiguration> emailSettings)
+        public UnitOfWork(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IOptions<JWT> jwt, IOptions<EmailConfiguration> emailSettings, IOptions<AdminLogin> adminLogin)
         {
             _context = context;
             _userManager = userManager;
             _jwt = jwt;
             _repositories = new();
             _emailSettings = emailSettings;
+            _adminLogin = adminLogin;
         }
 
         #endregion

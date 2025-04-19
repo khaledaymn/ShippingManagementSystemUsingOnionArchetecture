@@ -100,6 +100,7 @@ namespace ShippingManagementSystem.Domain.Services
                         UserClaims.Add(claim);
                     }
                     var addClaimResult = await _userManager.AddClaimsAsync(newUser, UserClaims);
+
                     if (!addClaimResult.Succeeded)
                     {
                         _unit.RollbackAsync();

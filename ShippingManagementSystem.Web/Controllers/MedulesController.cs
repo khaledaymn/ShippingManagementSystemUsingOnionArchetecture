@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ShippingManagementSystem.Application.Helpers;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.MeduleDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
@@ -9,6 +12,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MedulesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

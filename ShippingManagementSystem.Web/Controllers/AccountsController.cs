@@ -1,16 +1,9 @@
-﻿using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using ShippingManagementSystem.Application.DTOs.AuthenticationDTOs;
 using ShippingManagementSystem.Application.UnitOfWork;
-using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace ShippingManagementSystem.Web.Controllers
 {
-    [EnableCors("AllowOrigins")]
     [Route("[controller]")]
     [ApiController]
     public class AccountsController : ControllerBase
@@ -88,10 +81,8 @@ namespace ShippingManagementSystem.Web.Controllers
                 var result = await _unitOfWork.AuthenticationService.Login(model);
 
                 if (!result.IsAuthenticated)
-                {
                     return BadRequest(result.Message);
-                }
-                var permissionList = result.Permissions.Select(p => new
+                var permissionList = result?.Permissions?.Select(p => new
                 {
                     name = p.Key,
                     values = p.Value

@@ -12,5 +12,6 @@ namespace ShippingManagementSystem.Domain.Interfaces
         Task<(bool IsSuccess, string Message)> CreateCityAsync(CreateCityDTO cityDTO);
         Task<(bool IsSuccess, string Message)> UpdateCityAsync(int id, CityDTO cityDTO);
         Task<(bool IsSuccess, string Message)> DeleteCityAsync(int id);
+        Task<(bool IsSuccess, EditCity)> EditCityAsync(EditCity cityDTO);
     }
 } 

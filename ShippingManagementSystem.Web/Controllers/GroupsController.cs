@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ShippingManagementSystem.Application.Helpers;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.GroupDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
@@ -10,6 +12,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class GroupsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -21,6 +24,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Group/GetAll")]
+        //[Authorize(Policy = Permissions.View)]
         public async Task<IActionResult> GetAllGroups([FromQuery] GroupParams param)
         {
             var result = await _unitOfWork.GroupService.GetAllGroupsAsync(param);
@@ -40,6 +44,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/Group/Create")]
+        //[Authorize(Policy = Permissions.Create)]
         public async Task<IActionResult> CreateGroup([FromBody] CreateGroupDTO groupDTO)
         {
             if (!ModelState.IsValid)
@@ -55,6 +60,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/Group/Update/{id}")]
+        //[Authorize(Policy = Permissions.Edit)]
         public async Task<IActionResult> UpdateGroup(int id, [FromBody] UpdateGroupDTO groupDTO)
         {
             if (!ModelState.IsValid)
@@ -70,6 +76,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpDelete]
         [Route("~/Group/Delete/{id}")]
+        //[Authorize(Policy = Permissions.Delete)]
         public async Task<IActionResult> DeleteGroup(int id)
         {
             var result = await _unitOfWork.GroupService.DeleteGroupAsync(id);

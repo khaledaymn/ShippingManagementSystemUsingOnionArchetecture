@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ShippingManagementSystem.Application.Helpers;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.RejectedReasonDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
@@ -9,6 +12,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class RejectedReasonsController : ControllerBase
     {
         private readonly IUnitOfWork _uniteOfWork;
@@ -20,6 +24,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/RejectedReasons/GetAll")]
+        //[Authorize(Policy = RejectedReasons.View)]
         public async Task<IActionResult> GetAllRejectedReasons([FromQuery] RejectedReasonParams param)
         {
             var result = await _uniteOfWork.RejectedReasonService.GetAllRejectedReasonsAsync(param);
@@ -39,6 +44,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/RejectedReasons/CreateRejectedReason")]
+        //[Authorize(Policy = RejectedReasons.Create)]
         public async Task<IActionResult> CreateRejectedReason([FromBody] CreateRejectedReasonDTO rejectedReasonDTO)
         {
             if (!ModelState.IsValid)
@@ -54,6 +60,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/RejectedReasons/UpdateRejectedReason/{id}")]
+        //[Authorize(Policy = RejectedReasons.Edit)]
         public async Task<IActionResult> UpdateRejectedReason(int id, [FromBody] RejectedReasonDTO rejectedReasonDTO)
         {
             if (!ModelState.IsValid)
@@ -69,6 +76,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpDelete]
         [Route("~/RejectedReasons/DeleteRejectedReason/{id}")]
+        //[Authorize(Policy = RejectedReasons.Delete)]
         public async Task<IActionResult> DeleteRejectedReason(int id)
         {
             var result = await _uniteOfWork.RejectedReasonService.DeleteRejectedReasonAsync(id);

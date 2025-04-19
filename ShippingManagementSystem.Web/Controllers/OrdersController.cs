@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ShippingManagementSystem.Application.Helpers;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.OrderDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
@@ -9,6 +12,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class OrdersController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -21,6 +25,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Orders/GetAll")]
+        //[Authorize(Policy = Orders.View)]
         public async Task<IActionResult> GetAllOrders([FromQuery] OrderParams param)
         {
             var result = await _unitOfWork.OrderService.GetAllOrdersAsync(param);
@@ -40,6 +45,7 @@ namespace ShippingManagementSystem.Web.Controllers
         
         [HttpGet]
         [Route("~/Orders/GetByStatus/{status}")]
+        //[Authorize(Policy = Orders.View)]
         public async Task<IActionResult> GetOrdersByStatus(string status)
         {
             var orders = await _unitOfWork.OrderService.GetOrdersByStatusAsync(status);
@@ -48,6 +54,7 @@ namespace ShippingManagementSystem.Web.Controllers
         
         [HttpGet]
         [Route("~/Orders/GetProductsByOrderId/{orderId}")]
+        //[Authorize(Policy = Orders.View)]
         public async Task<IActionResult> GetProductsByOrderId(int orderId)
         {
             var products = await _unitOfWork.OrderService.GetAllProductsByOrderIdAsync(orderId);
@@ -56,6 +63,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/Orders/CreateOrder")]
+        //[Authorize(Policy = Orders.Create)]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDTO orderDTO)
         {
             if (!ModelState.IsValid)
@@ -71,6 +79,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/Orders/UpdateOrder/{id}")]
+        //[Authorize(Policy = Orders.Edit)]
         public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusDTO statusDTO)
         {
             if (!ModelState.IsValid)
@@ -86,6 +95,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpDelete]
         [Route("~/Orders/DeleteOrder/{id}")]
+        //[Authorize(Policy = Orders.Delete)]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             var result = await _unitOfWork.OrderService.DeleteOrderAsync(id);

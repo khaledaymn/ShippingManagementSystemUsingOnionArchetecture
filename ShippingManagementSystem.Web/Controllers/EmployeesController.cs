@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ShippingManagementSystem.Application.Helpers;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.EmployeeDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
@@ -9,6 +12,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class EmployeesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -21,6 +25,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Employees/GetAll")]
+        //[Authorize(Policy = Employees.View)]
         public async Task<ActionResult<IReadOnlyList<EmployeeDTO>>> GetAll([FromQuery] EmployeeParams param)
         {
             try
@@ -41,6 +46,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/Employees/Add")]
+        //[Authorize(Policy = Employees.Create)]
         public async Task<ActionResult> Add(AddEmployeeDTO dto)
         {
             try
@@ -67,6 +73,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/Employees/Update")]
+        //[Authorize(Policy = Employees.Edit)]
         public async Task<ActionResult> Update(UpdateEmployeeDTO dto)
         {
             try
@@ -93,6 +100,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpDelete]
         [Route("~/Employees/Delete/{id}")]
+        //[Authorize(Policy = Employees.Delete)]
         public async Task<ActionResult> Delete(string id)
         {
             try

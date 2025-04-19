@@ -166,6 +166,52 @@ namespace ShippingManagementSystem.Application.Services
             }
         }
 
+        public async Task<(bool IsSuccess, EditCity)> EditCityAsync(EditCity cityDTO)
+        {
+            try
+            {
+                var city = await _unitOfWork.Repository<City>().GetById(cityDTO.Id);
+
+                if (city == null)
+                    return (false, null);
+
+                // Only update properties that are provided
+                if (!string.IsNullOrEmpty(cityDTO.Name))
+                {
+                    city.Name = cityDTO.Name;
+                }
+
+                if (cityDTO.ChargePrice > 0)
+                {
+                    city.ChargePrice = cityDTO.ChargePrice;
+                }
+
+                if (cityDTO.PickUpPrice > 0)
+                {
+                    city.PickUpPrice = cityDTO.PickUpPrice;
+                }
+
+                if (cityDTO.GovernorateId > 0 && cityDTO.GovernorateId != city.GovernorateId)
+                {
+                    var governorate = await _unitOfWork.Repository<Governorate>().GetById(cityDTO.GovernorateId);
+                    if (governorate == null)
+                        return (false, null);
+
+                    city.GovernorateId = cityDTO.GovernorateId;
+                }
+
+                _unitOfWork.Repository<City>().Update(city);
+                await _unitOfWork.Save();
+
+                return (true, cityDTO);
+            }
+            catch (Exception ex)
+            {
+                // Consider logging the exception here
+                return (false, null);
+            }
+        }
+
         public async Task<(bool IsSuccess, string Message)> DeleteCityAsync(int id)
         {
             try
@@ -176,7 +222,7 @@ namespace ShippingManagementSystem.Application.Services
                     return (false, $"City with id {id} not found");
                 
                 // Soft delete
-                city.IsDeleted = true;
+                city.IsDeleted = !city.IsDeleted;
                 _unitOfWork.Repository<City>().Update(city);
                 
                 // Hard delete if needed

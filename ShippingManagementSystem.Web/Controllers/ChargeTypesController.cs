@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ShippingManagementSystem.Application.Helpers;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.ChargeTypeDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
@@ -9,6 +12,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ChargeTypesController : ControllerBase
     {
         private readonly IUnitOfWork _uniteOfWork;
@@ -20,6 +24,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/ChargeTypes/GetAll")]
+        //[Authorize(Policy = ChargeTypes.View)]
         public async Task<IActionResult> GetAllChargeTypes([FromQuery] ChargeTypeParams param)
         {
             var result = await _uniteOfWork.ChargeTypeService.GetAllChargeTypesAsync(param);
@@ -39,6 +44,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/ChargeTypes/Create")]
+        //[Authorize(Policy = ChargeTypes.Create)]
         public async Task<IActionResult> CreateChargeType([FromBody] CreateChargeTypeDTO chargeTypeDTO)
         {
             if (!ModelState.IsValid)
@@ -54,6 +60,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/ChargeTypes/Update/{id:int}")]
+        //[Authorize(Policy = ChargeTypes.Edit)]
         public async Task<IActionResult> UpdateChargeType(int id, [FromBody] ChargeTypeDTO chargeTypeDTO)
         {
             if (!ModelState.IsValid)
@@ -69,6 +76,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpDelete]
         [Route("~/ChargeTypes/Delete/{id:int}")]
+        //[Authorize(Policy = ChargeTypes.Delete)]
         public async Task<IActionResult> DeleteChargeType(int id)
         {
             var result = await _uniteOfWork.ChargeTypeService.DeleteChargeTypeAsync(id);
@@ -79,4 +87,4 @@ namespace ShippingManagementSystem.Web.Controllers
             return Ok(result.Message);
         }
     }
-} 
+}

@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ShippingManagementSystem.Application.Helpers;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.BranchDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
@@ -9,6 +12,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class BranchesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -20,6 +24,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Branches/GetAll")]
+        //[Authorize(Policy = Branches.View)]
         public async Task<IActionResult> GetAllBranches([FromQuery] BranchParams param)
         {
             var result = await _unitOfWork.BranchService.GetAllBranchesAsync(param);
@@ -39,6 +44,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/Branches/Create")]
+        //[Authorize(Policy = Branches.Create)]
         public async Task<IActionResult> CreateBranch([FromBody] CreateBranchDTO branchDTO)
         {
             if (!ModelState.IsValid)
@@ -54,6 +60,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/Branches/Update/{id}")]
+        //[Authorize(Policy = Branches.Edit)]
         public async Task<IActionResult> UpdateBranch(int id, [FromBody] BranchDTO branchDTO)
         {
             if (!ModelState.IsValid)
@@ -69,6 +76,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpDelete]
         [Route("~/Branches/Delete/{id}")]
+        //[Authorize(Policy = Branches.Delete)]
         public async Task<IActionResult> DeleteBranch(int id)
         {
             var result = await _unitOfWork.BranchService.DeleteBranchAsync(id);

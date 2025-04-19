@@ -1,4 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ShippingManagementSystem.Application.Helpers;
+using ShippingManagementSystem.Application.Services;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.CityDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
@@ -9,6 +13,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CitiesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -20,6 +25,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Cities/GetAll")]
+        //[Authorize(Policy = Cities.View)]
         public async Task<IActionResult> GetAllCities([FromQuery] CityParams param)
         {
             var result = await _unitOfWork.CityService.GetAllCitiesAsync(param);
@@ -39,6 +45,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/Cities/CreateCity")]
+        //[Authorize(Policy = Cities.Create)]
         public async Task<IActionResult> CreateCity([FromBody] CreateCityDTO cityDTO)
         {
             if (!ModelState.IsValid)
@@ -54,6 +61,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/Cities/UpdateCity/{id}")]
+        //[Authorize(Policy = Cities.Edit)]
         public async Task<IActionResult> UpdateCity(int id, [FromBody] CityDTO cityDTO)
         {
             if (!ModelState.IsValid)
@@ -69,6 +77,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpDelete]
         [Route("~/Cities/DeleteCity/{id}")]
+        //[Authorize(Policy = Cities.Delete)]
         public async Task<IActionResult> DeleteCity(int id)
         {
             var result = await _unitOfWork.CityService.DeleteCityAsync(id);
@@ -77,6 +86,26 @@ namespace ShippingManagementSystem.Web.Controllers
                 return NotFound(result.Message);
                 
             return Ok(result.Message);
+        }
+
+        [HttpPut]
+        [Route("~/Cities/Edit")]
+        //[Authorize(Policy = Cities.Edit)]
+        public async Task<IActionResult> EditCity([FromBody] EditCity cityDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var (isSuccess, result) = await _unitOfWork.CityService.EditCityAsync(cityDTO);
+
+            if (!isSuccess)
+            {
+                return NotFound(new { message = "City or Governorate not found" });
+            }
+
+            return Ok(result);
         }
     }
 } 

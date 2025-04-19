@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ShippingManagementSystem.Application.Helpers;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.MerchantDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
@@ -9,6 +12,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MerchantsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -22,6 +26,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Merchants/GetAll")]
+        //[Authorize(Policy = Merchants.View)]
         public async Task<ActionResult<IReadOnlyList<MerchantDTO>>> GetAll([FromQuery] MerchantParams param)
         {
             try
@@ -41,6 +46,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/Merchants/Add")]
+        //[Authorize(Policy = Merchants.Create)]
         public async Task<ActionResult> Add(AddMerchantDTO dto)
         {
             try
@@ -66,6 +72,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/Merchants/Update")]
+        //[Authorize(Policy = Merchants.Edit)]
         public async Task<ActionResult> Update(UpdateMerchantDTO dto)
         {
             try
@@ -91,6 +98,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpDelete]
         [Route("~/Merchants/Delete/{id}")]
+        //[Authorize(Policy = Merchants.Delete)]
         public async Task<ActionResult> Delete(string id)
         {
             try
@@ -108,6 +116,7 @@ namespace ShippingManagementSystem.Web.Controllers
         }
 
         #endregion
+
 
         #region Get Merchant By Id
 

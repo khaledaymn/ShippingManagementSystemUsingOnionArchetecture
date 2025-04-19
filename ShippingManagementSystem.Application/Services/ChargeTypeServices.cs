@@ -115,14 +115,12 @@ namespace ShippingManagementSystem.Application.Services
                 
                 // For numeric values, we need a different approach
                 // We'll assume a value of 0 or less means "don't update"
-                if (chargeTypeDTO.ExtraPrice > 0)
-                {
-                    chargeType.ExtraPrice = chargeTypeDTO.ExtraPrice;
-                }
+                if (chargeTypeDTO.ExtraPrice is not null && chargeTypeDTO.ExtraPrice > 0)
+                    chargeType.ExtraPrice = chargeTypeDTO.ExtraPrice ?? 0;
                 
-                if (chargeTypeDTO.NumOfDay > 0)
+                if (chargeTypeDTO.NumOfDay is not null && chargeTypeDTO.NumOfDay > 0)
                 {
-                    chargeType.NumOfDay = chargeTypeDTO.NumOfDay;
+                    chargeType.NumOfDay = chargeTypeDTO.NumOfDay ?? 0;
                 }
                 
                 _unitOfWork.Repository<ChargeType>().Update(chargeType);
@@ -146,7 +144,7 @@ namespace ShippingManagementSystem.Application.Services
                     return (false, $"Charge type with id {id} not found");
                 
                 // Soft delete
-                chargeType.IsDeleted = true;
+                chargeType.IsDeleted = !chargeType.IsDeleted;
                 _unitOfWork.Repository<ChargeType>().Update(chargeType);
                 
                 // Hard delete if needed

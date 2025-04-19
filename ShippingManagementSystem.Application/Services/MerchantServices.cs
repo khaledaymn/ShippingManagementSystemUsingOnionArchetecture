@@ -369,13 +369,12 @@ namespace ShippingManagementSystem.Application.Services
             if (merchant == null)
                 return (false, "Merchant not found.");
 
-            using (var transaction = await _unit.BeginTransactionAsync())
-            {
+          
                 try
                 {
                     // Soft delete the user
                     var user = merchant.User;
-                    user.IsDeleted = true;
+                    user.IsDeleted = !user.IsDeleted;
                     var updateResult = await _userManager.UpdateAsync(user);
 
                     if (!updateResult.Succeeded)
@@ -386,16 +385,13 @@ namespace ShippingManagementSystem.Application.Services
                     }
 
                     await _unit.Save();
-                    await transaction.CommitAsync();
 
                     return (true, "Merchant deleted successfully.");
                 }
                 catch (Exception ex)
                 {
-                    await transaction.RollbackAsync();
                     return (false, $"An error occurred: {ex.Message}");
                 }
-            }
         }
         #endregion
     }

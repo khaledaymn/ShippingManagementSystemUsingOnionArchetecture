@@ -62,8 +62,8 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
             var user = await _userManager.FindByEmailAsync(data.Email);
             if (user == null && data.Email == _adminLogin.Email && data.Password == _adminLogin.Password)
                await AdminLogin();
-
-            user = await _userManager.FindByNameAsync(data.Email);
+            if(user == null)
+                user = await _userManager.FindByNameAsync(data.Email);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, data.Password))
                 return new AuthenticationResponseDTO
@@ -72,7 +72,6 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
                 };
             try
             {
-
                 var jwtToken = await CreateJWTToken(user);
                 var roles = await _userManager.GetRolesAsync(user);
                 var result = new AuthenticationResponseDTO();
@@ -100,9 +99,6 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
                             permissions[moduleName].Add(actionName);
                         }
                     }
-
-                    // Optional: Convert to JSON format
-
 
                     result.Permissions = permissions;
 

@@ -248,7 +248,7 @@ namespace ShippingManagementSystem.Application.Services
                     return (false, $"Order with id {id} not found");
                 
                 // Soft delete
-                order.IsDeleted = true;
+                order.IsDeleted = !order.IsDeleted;
                 _unitOfWork.Repository<Order>().Update(order);
                 
                 await _unitOfWork.Save();

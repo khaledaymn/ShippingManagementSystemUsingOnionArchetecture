@@ -6,19 +6,8 @@ namespace ShippingManagementSystem.Domain.DTOs.BranchDTOs
     public class BranchDTO
     {
         public int Id { get; set; }
-        
-        [Required(ErrorMessage = "Branch name is required")]
-        [StringLength(100, ErrorMessage = "Branch name cannot exceed 100 characters")]
-        public string Name { get; set; } = string.Empty;
-        
-        public string CreationDate { get; set; }
-        
-        public bool IsDeleted { get; set; }
-        
-        [Required(ErrorMessage = "Location is required")]
-        public string Location { get; set; } = string.Empty;
-        
-        [Required(ErrorMessage = "City ID is required")]
-        public int CityId { get; set; }
+        public string? Name { get; set; } = string.Empty;
+        public string? Location { get; set; } = string.Empty; 
+        public int? CityId { get; set; }
     }
 }

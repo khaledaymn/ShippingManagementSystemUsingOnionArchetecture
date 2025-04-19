@@ -17,6 +17,7 @@ using ShippingManagementSystem.Domain.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ShippingManagementSystem.Application.Helpers;
 
 #endregion
 
@@ -37,10 +38,21 @@ builder.Services.AddControllers();
 
 #region Permission Configration
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-});
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.AddPolicy("AdminOrMerchantOrShippingRepOrHasPermission", policy =>
+//        policy.RequireAssertion(context =>
+//            // ????? 1: ?? ?? ??? ???????
+//            context.User.IsInRole(Roles.Admin) ||
+//            context.User.IsInRole(Roles.Merchant) ||
+//            context.User.IsInRole(Roles.ShippingRepresentative) ||
+
+//            // ????? 2: ?? ???? ????????
+//            context.User.HasClaim(c =>
+//                c.Type == Constants.Permission &&
+//                c.Value == $"{Medules.ShippingRepresentatives}.{Constants.View}")
+//        ));
+//});
 
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
@@ -86,7 +98,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowOrigins",
         builder =>
         {
-            builder.WithOrigins("http://localhost:4200", "http://localhost:50534")
+            builder.WithOrigins("http://localhost:4200", "http://localhost:50534", "http://localhost:60711")
                    .AllowAnyMethod()
                    .AllowAnyHeader()
                    .AllowCredentials();
@@ -162,15 +174,15 @@ builder.Services.AddOpenApi();
 
 #region Exption Handling
 
-builder.Services.Configure<ApiBehaviorOptions>(Options =>
-{
-    Options.InvalidModelStateResponseFactory = (ActionContext) =>
-    {
-        var errors = ActionContext.ModelState.Where(p => p.Value.Errors.Count() > 0).SelectMany(p => p.Value.Errors).Select(e => e.ErrorMessage).ToArray();
-        var reponse = new APIResponseValidationError(errors);
-        return new BadRequestObjectResult(reponse);
-    };
-});
+//builder.Services.Configure<ApiBehaviorOptions>(Options =>
+//{
+//    Options.InvalidModelStateResponseFactory = (ActionContext) =>
+//    {
+//        var errors = ActionContext.ModelState.Where(p => p.Value.Errors.Count() > 0).SelectMany(p => p.Value.Errors).Select(e => e.ErrorMessage).ToArray();
+//        var reponse = new APIResponseValidationError(errors);
+//        return new BadRequestObjectResult(reponse);
+//    };
+//});
 
 #endregion
 
@@ -226,8 +238,8 @@ builder.Services.AddSwaggerGen(option =>
     });
 
     // Enable XML comments if available
-    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    option.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    //var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    //option.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 
 });
 

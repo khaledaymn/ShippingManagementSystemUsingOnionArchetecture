@@ -128,7 +128,7 @@ namespace ShippingManagementSystem.Application.Services
                     return (false, $"Rejected reason with id {id} not found");
                 
                 // Soft delete
-                rejectedReason.IsDeleted = true;
+                rejectedReason.IsDeleted = !rejectedReason.IsDeleted;
                 _unitOfWork.Repository<RejectedReason>().Update(rejectedReason);
                 
                 // Hard delete if needed

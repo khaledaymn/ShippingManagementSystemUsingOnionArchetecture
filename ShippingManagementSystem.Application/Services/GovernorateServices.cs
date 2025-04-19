@@ -128,7 +128,7 @@ namespace ShippingManagementSystem.Application.Services
                     return (false, $"Governorate with id {id} not found");
                 
                 // Soft delete
-                governorate.IsDeleted = true;
+                governorate.IsDeleted = !governorate.IsDeleted;
                 _unitOfWork.Repository<Governorate>().Update(governorate);
                 
                 // Hard delete if needed

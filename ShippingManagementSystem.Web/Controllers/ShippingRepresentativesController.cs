@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShippingManagementSystem.Application.Exptions;
@@ -13,6 +14,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] 
     public class ShippingRepresentativesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -26,6 +28,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/ShippingRepresentatives/GetAll")]
+        //[Authorize(Policy = ShippingRepresentatives.View)]
         public async Task<ActionResult<PaginationResponse<ShippingRepresentativeDTO>>> GetAll([FromQuery] ShippingRepresentativeParams param)
         {
             try
@@ -40,6 +43,7 @@ namespace ShippingManagementSystem.Web.Controllers
         }
 
         #endregion
+
 
         #region Get Shipping Representative By Id
 
@@ -63,10 +67,12 @@ namespace ShippingManagementSystem.Web.Controllers
 
         #endregion
 
+
         #region Add Shipping Representative
 
         [HttpPost]
         [Route("~/ShippingRepresentatives/Add")]
+        //[Authorize(Policy = ShippingRepresentatives.Create)]
         public async Task<ActionResult> Add(AddShippingRepresentativeDTO dto)
         {
             try
@@ -88,10 +94,12 @@ namespace ShippingManagementSystem.Web.Controllers
 
         #endregion
 
+
         #region Update Shipping Representative
 
         [HttpPut]
         [Route("~/ShippingRepresentatives/Update")]
+        //[Authorize(Policy = ShippingRepresentatives.Edit)]
         public async Task<ActionResult> Update(UpdateShippingRepresentativeDTO dto)
         {
             try
@@ -113,10 +121,12 @@ namespace ShippingManagementSystem.Web.Controllers
 
         #endregion
 
+
         #region Delete Shipping Representative
 
         [HttpDelete]
         [Route("~/ShippingRepresentatives/Delete/{id}")]
+        //[Authorize(Policy = ShippingRepresentatives.Delete)]
         public async Task<ActionResult> Delete(string id)
         {
             try
