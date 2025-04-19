@@ -10,13 +10,14 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Shi
         {
             // Apply filtering
             Expression<Func<ShippigRepresentative, bool>> searchCriteria = null;
-            Criteria = m => !m.User.IsDeleted;
 
             if (!string.IsNullOrEmpty(param.Search))
             {
                 searchCriteria = sr => 
                     sr.User.Name.Contains(param.Search) ||
                     sr.User.Email.Contains(param.Search) ||
+                    sr.User.UserName.Contains(param.Search) ||
+                    sr.User.IsDeleted == param.IsActive ||
                     sr.User.PhoneNumber.Contains(param.Search);
             }
             
@@ -49,24 +50,21 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Shi
             }
             
             // Apply sorting
-            if (!string.IsNullOrEmpty(param.SortBy))
+            if (!string.IsNullOrEmpty(param.Sort))
             {
-                switch (param.SortBy.ToLower())
+                switch (param.Sort.ToLower())
                 {
                     case "name":
-                        if (param.SortDirection.ToLower() == "desc")
                             ApplyOrderByDescending(sr => sr.User.Name);
                         else
                             ApplyOrderBy(sr => sr.User.Name);
                         break;
                     case "email":
-                        if (param.SortDirection.ToLower() == "desc")
                             ApplyOrderByDescending(sr => sr.User.Email);
                         else
                             ApplyOrderBy(sr => sr.User.Email);
                         break;
                     case "companypercentage":
-                        if (param.SortDirection.ToLower() == "desc")
                             ApplyOrderByDescending(sr => sr.CompanyPersentage);
                         else
                             ApplyOrderBy(sr => sr.CompanyPersentage);

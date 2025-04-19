@@ -59,22 +59,6 @@ namespace ShippingManagementSystem.Web.Controllers
             return Ok(result.Message);
         }
 
-        [HttpPut]
-        [Route("~/Cities/UpdateCity/{id}")]
-        //[Authorize(Policy = Cities.Edit)]
-        public async Task<IActionResult> UpdateCity(int id, [FromBody] CityDTO cityDTO)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            
-            var result = await _unitOfWork.CityService.UpdateCityAsync(id, cityDTO);
-            
-            if (!result.IsSuccess)
-                return BadRequest(result.Message);
-                
-            return Ok(result.Message);
-        }
-
         [HttpDelete]
         [Route("~/Cities/DeleteCity/{id}")]
         //[Authorize(Policy = Cities.Delete)]
@@ -91,7 +75,7 @@ namespace ShippingManagementSystem.Web.Controllers
         [HttpPut]
         [Route("~/Cities/Edit")]
         //[Authorize(Policy = Cities.Edit)]
-        public async Task<IActionResult> EditCity([FromBody] EditCity cityDTO)
+        public async Task<IActionResult> EditCity([FromBody] EditCityDTO cityDTO)
         {
             if (!ModelState.IsValid)
             {

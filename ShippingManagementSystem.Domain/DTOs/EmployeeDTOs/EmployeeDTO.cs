@@ -14,7 +14,7 @@ namespace ShippingManagementSystem.Domain.DTOs.EmployeeDTOs
         public string Email { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public string CreationDate { get; set; }
-        public List<BranchDTO> Branches { get; set; }
+        public List<GetBranchDTO> Branches { get; set; }
         public string Permission { get; set; }
         public bool IsDeleted { get; set; }
     }

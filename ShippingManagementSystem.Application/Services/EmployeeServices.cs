@@ -170,14 +170,14 @@ namespace ShippingManagementSystem.Domain.Services
                 PhoneNumber = emp.User?.PhoneNumber ?? string.Empty,
                 CreationDate = emp.User?.HiringDate.ToString("yyyy-MM-dd") ?? DateTime.UtcNow.ToString("yyyy-MM-dd"),
                 Branches = emp.User?.UserBranches?
-                    .Select(ub => new BranchDTO
+                    .Select(ub => new GetBranchDTO
                     {
                         Id = ub.BranchId,
                         Name = ub.Branch?.Name ?? string.Empty,
                         CreationDate = ub.Branch?.CreationDate.ToString("yyyy-MM-dd") ?? DateTime.UtcNow.ToString("yyyy-MM-dd"),
                         IsDeleted = ub.Branch?.IsDeleted ?? false
                     })
-                    .ToList() ?? new List<BranchDTO>(),
+                    .ToList() ?? new List<GetBranchDTO>(),
                 Permission = emp.Group.Name ?? string.Empty, // فعّلي لو فيه حقل Permission
                 IsDeleted = emp.User?.IsDeleted ?? false
             }).ToList();
@@ -217,14 +217,14 @@ namespace ShippingManagementSystem.Domain.Services
                 PhoneNumber = user.PhoneNumber,
                 CreationDate = user.HiringDate.ToString("yyyy-MM-dd"),
                 Branches = user.UserBranches?
-                    .Select(ub => new BranchDTO
+                    .Select(ub => new GetBranchDTO
                     {
                         Id = ub.BranchId,
                         Name = ub.Branch?.Name ?? string.Empty,
                         CreationDate = ub.Branch?.CreationDate.ToString("yyyy-MM-dd") ?? DateTime.UtcNow.ToString("yyyy-MM-dd"),
                         IsDeleted = ub.Branch?.IsDeleted ?? false
                     })
-                    .ToList() ?? new List<BranchDTO>(),
+                    .ToList() ?? new List<GetBranchDTO>(),
                 Permission = employee.Group.Name ?? string.Empty,
                 IsDeleted = user.IsDeleted
             };

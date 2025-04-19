@@ -13,11 +13,11 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Emp
         public bool? IsActive { get; set; }
         public string? Sort { get; set; }
         public int PageIndex { get; set; } = 1;
-        public int PageSize { get; set; } = 100;
+        public int PageSize { get; set; } = 10;
 
         public EmployeeParams()
         {
-            PageSize = Math.Clamp(PageSize, 1, 100);
+            PageSize = Math.Clamp(PageSize, 1, 10);
         }
     }
 }

@@ -4,7 +4,7 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Shi
 {
     public class ShippingRepresentativeParams
     {
-        private const int MaxPageSize = 100;
+        private const int MaxPageSize = 10;
         private int _pageSize = 100;
         
         public int PageIndex { get; set; } = 1;
@@ -14,10 +14,11 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Shi
             get => _pageSize;
             set => _pageSize = (value > MaxPageSize) ? MaxPageSize : value;
         }
-        
+
         public string? Search { get; set; }
-        public string? SortBy { get; set; }
-        public string? SortDirection { get; set; } = "asc";
+        public string? Branch { get; set; }
+        public bool? IsActive { get; set; }
+        public string? Sort { get; set; }
         public int? GovernorateId { get; set; }
     }
 }

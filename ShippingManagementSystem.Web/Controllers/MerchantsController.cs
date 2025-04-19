@@ -1,8 +1,5 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ShippingManagementSystem.Application.Helpers;
 using Shipping_Project.DTOs.MerchantDtos;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.Interfaces;
@@ -12,11 +9,10 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MerchantsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        
+
         public MerchantsController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -26,7 +22,7 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Merchants/GetAll")]
-        public async Task<ActionResult<IReadOnlyList<MerchantDTO>>> GetAll([FromQuery] MerchantParams param)
+        public async Task<ActionResult<IReadOnlyList<GovernoratePaginationForCount<MerchantDTO>>>> GetAll([FromQuery] MerchantParams param)
         {
             try
             {
@@ -41,11 +37,12 @@ namespace ShippingManagementSystem.Web.Controllers
 
         #endregion
 
+
         #region Add Merchant
 
         [HttpPost]
         [Route("~/Merchants/Add")]
-        public async Task<ActionResult> Add(AddMerchantDTO dto)
+        public async Task<ActionResult> Add(MerchantDtoForAdding dto)
         {
             try
             {
@@ -68,11 +65,12 @@ namespace ShippingManagementSystem.Web.Controllers
 
         #endregion
 
+
         #region Update Merchant
 
         [HttpPut]
         [Route("~/Merchants/Update")]
-        public async Task<ActionResult> Update(UpdateMerchantDTO dto)
+        public async Task<ActionResult> Update(MerchecntForEditingAndGetting dto)
         {
             try
             {
@@ -93,11 +91,11 @@ namespace ShippingManagementSystem.Web.Controllers
 
         #endregion
 
+
         #region Delete Merchant
 
         [HttpDelete]
         [Route("~/Merchants/Delete/{id}")]
-        //[Authorize(Policy = Merchants.Delete)]
         public async Task<ActionResult> Delete(string id)
         {
             try
@@ -139,5 +137,6 @@ namespace ShippingManagementSystem.Web.Controllers
         }
 
         #endregion
+
     }
 }

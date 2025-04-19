@@ -10,8 +10,8 @@ namespace ShippingManagementSystem.Domain.Interfaces
         Task<PaginationResponse<CityDTO>> GetAllCitiesAsync(CityParams param);
         Task<CityDTO?> GetCityByIdAsync(int id);
         Task<(bool IsSuccess, string Message)> CreateCityAsync(CreateCityDTO cityDTO);
-        Task<(bool IsSuccess, string Message)> UpdateCityAsync(int id, CityDTO cityDTO);
+        //Task<(bool IsSuccess, string Message)> UpdateCityAsync(int id, CityDTO cityDTO);
         Task<(bool IsSuccess, string Message)> DeleteCityAsync(int id);
-        Task<(bool IsSuccess, EditCity)> EditCityAsync(EditCity cityDTO);
+        Task<(bool IsSuccess, EditCityDTO)> EditCityAsync(EditCityDTO cityDTO);
     }
 } 

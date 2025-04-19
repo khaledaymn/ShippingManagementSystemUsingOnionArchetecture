@@ -23,6 +23,8 @@ namespace ShippingManagementSystem.Web.Controllers
         }
 
 
+        #region Get All Orders
+
         [HttpGet]
         [Route("~/Orders/GetAll")]
         //[Authorize(Policy = Orders.View)]
@@ -31,6 +33,11 @@ namespace ShippingManagementSystem.Web.Controllers
             var result = await _unitOfWork.OrderService.GetAllOrdersAsync(param);
             return Ok(result);
         }
+
+        #endregion
+
+
+        #region Get Order By Id
 
         [HttpGet]
         [Route("~/Orders/GetById/{id}")]
@@ -42,7 +49,33 @@ namespace ShippingManagementSystem.Web.Controllers
             
             return Ok(order);
         }
-        
+
+        #endregion
+
+
+        #region Assign Order To Delivery
+
+        [HttpPut]
+        [Route("~/Orders/AssignToDelivery/{id}")]
+        //[Authorize(Policy = Orders.Edit)]
+        public async Task<IActionResult> AssignOrderToDelivery(int id, [FromBody] AssignOrderToDelivaryDTO statusDTO)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _unitOfWork.OrderService.AssignOrderToDelivaryAsync(id, statusDTO);
+
+            if (!result.IsSuccess)
+                return BadRequest(result.Message);
+
+            return Ok(result.Message);
+        }
+
+        #endregion
+
+
+        #region Get Orders By Status
+
         [HttpGet]
         [Route("~/Orders/GetByStatus/{status}")]
         //[Authorize(Policy = Orders.View)]
@@ -51,7 +84,12 @@ namespace ShippingManagementSystem.Web.Controllers
             var orders = await _unitOfWork.OrderService.GetOrdersByStatusAsync(status);
             return Ok(orders);
         }
-        
+
+        #endregion
+
+
+        #region Get Products By Order Id
+
         [HttpGet]
         [Route("~/Orders/GetProductsByOrderId/{orderId}")]
         //[Authorize(Policy = Orders.View)]
@@ -60,6 +98,11 @@ namespace ShippingManagementSystem.Web.Controllers
             var products = await _unitOfWork.OrderService.GetAllProductsByOrderIdAsync(orderId);
             return Ok(products);
         }
+
+        #endregion
+
+
+        #region CreateOrder
 
         [HttpPost]
         [Route("~/Orders/CreateOrder")]
@@ -77,6 +120,11 @@ namespace ShippingManagementSystem.Web.Controllers
             return Ok(result.Message);
         }
 
+        #endregion
+
+
+        #region Update Order Status
+
         [HttpPut]
         [Route("~/Orders/UpdateOrder/{id}")]
         //[Authorize(Policy = Orders.Edit)]
@@ -93,6 +141,10 @@ namespace ShippingManagementSystem.Web.Controllers
             return Ok(result.Message);
         }
 
+        #endregion
+
+
+        #region Delete Order
         [HttpDelete]
         [Route("~/Orders/DeleteOrder/{id}")]
         //[Authorize(Policy = Orders.Delete)]
@@ -105,5 +157,8 @@ namespace ShippingManagementSystem.Web.Controllers
                 
             return Ok(result.Message);
         }
+
+        #endregion
+
     }
 } 

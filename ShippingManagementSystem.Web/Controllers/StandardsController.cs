@@ -21,32 +21,6 @@ namespace ShippingManagementSystem.Web.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet]
-        [Route("~/Standard/GetAll")]
-        //[Authorize(Policy = Settings.View)]
-        public async Task<IActionResult> GetAllStandards()
-        {
-            var standards = await _unitOfWork.standardServices.GetAllStandardsAsync();
-            return Ok(standards);
-        }
-
-
-        [HttpPost]
-        [Route("~/Standard/Create")]
-        //[Authorize(Policy = Settings.Create)]
-        public async Task<IActionResult> CreateStandard([FromBody] CreateStandardDTO standardDTO)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            
-            var result = await _unitOfWork.standardServices.CreateStandardAsync(standardDTO);
-            
-            if (!result.IsSuccess)
-                return BadRequest(result.Message);
-                
-            return Ok(result.Message);
-        }
-
         [HttpPut]
         [Route("~/Standard/Update/{id}")]
         //[Authorize(Policy = Settings.Edit)]

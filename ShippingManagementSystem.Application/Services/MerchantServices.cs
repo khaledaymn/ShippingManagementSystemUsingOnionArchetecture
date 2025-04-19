@@ -37,89 +37,84 @@ namespace ShippingManagementSystem.Application.Services
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
+
         #region Add Merchant
         public async Task<(bool IsSuccess, string Message)> AddMerchantAsync(MerchantDtoForAdding dto)
         {
-                if (dto == null || string.IsNullOrEmpty(dto.Email))
-                    return (false, "Invalid merchant data.");
+            if (dto == null || string.IsNullOrEmpty(dto.Email))
+                return (false, "Invalid merchant data.");
+
             if (dto.Email.CheckEmailExists(_userManager).Result)
                 return (false, "Email already Exists");
 
-
-        var newUser = new ApplicationUser
-                {
-                    Name = dto.Name,
-                    UserName = dto.Name.Replace(" ", ""),
-                    Email = dto.Email,
-                    PhoneNumber = dto.PhoneNumber,
-                    IsDeleted = false,
-                    HiringDate = DateTime.Now,
-                    Address = dto.Address,
-
-             
+            var newUser = new ApplicationUser
+            {
+                Name = dto.Name,
+                UserName = dto.Name.Replace(" ", ""),
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                IsDeleted = false,
+                HiringDate = DateTime.Now,
+                Address = dto.Address
             };
 
-                using (var transaction = await _unit.BeginTransactionAsync())
+            using var transaction = await _unit.BeginTransactionAsync();
+
+            try
+            {
+                var result = await _userManager.CreateAsync(newUser, dto.Password);
+                if (!result.Succeeded)
                 {
-                    try
+                    await _unit.RollbackAsync();
+                    var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                    return (false, $"Create failed: {errors}");
+                }
+
+                await _userManager.AddToRoleAsync(newUser, Roles.Merchant);
+
+                var merchant = new Merchant
+                {
+                    UserID = newUser.Id,
+                    StoreName = dto.StoreName,
+                    RejectedOrederPercentage = dto.RejectedOrderPrecentage,
+                    SpecialPickUp = dto.SpecialPickUp
+                };
+
+                await _unit.Repository<Merchant>().Add(merchant);
+
+                if (dto.BranchesIds?.Count > 0)
+                {
+                    var userBranches = dto.BranchesIds
+                        .Select(branchId => new UserBranches(newUser.Id, branchId))
+                        .ToList();
+
+                    await _unit.Repository<UserBranches>().AddRange(userBranches);
+                }
+
+                if (dto.SpecialDeliveryPrices != null && dto.SpecialDeliveryPrices.Any())
+                {
+                    foreach (var specialPrice in dto.SpecialDeliveryPrices)
                     {
-                        var result = await _userManager.CreateAsync(newUser, dto.Password);
-                        if (!result.Succeeded)
+                        var merchantSpecialPrice = new MerchantSpecialPrice
                         {
-                            await _unit.RollbackAsync();
-                            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                            return (false, $"Create failed: {errors}");
-                        }
-                        await _userManager.AddToRoleAsync(newUser, Roles.Merchant);
-                        var merchant = new Merchant
-                        {
-                            UserID = newUser.Id,
-                            StoreName = dto.StoreName,
-                            RejectedOrederPercentage = dto.RejectedOrderPrecentage,
-                            SpecialPickUp = dto.SpecialPickUp
-                             
+                            MerchantId = newUser.Id,
+                            CityId = specialPrice.cityId,
+                            SpecialPrice = specialPrice.SpecialPreice
                         };
-                        await _unit.Repository<Merchant>().Add(merchant);
-
-
-                    if (dto.BranchesIds?.Count > 0)
-                    {
-                        var userBranches = dto.BranchesIds
-                            .Select(branchId => new UserBranches(newUser.Id, branchId))
-                            .ToList();
-
-                        await _unit.Repository<UserBranches>().AddRange(userBranches);
-                    }
-                    
-                    if (dto.SpecialDeliveryPrices != null && dto.SpecialDeliveryPrices.Any())
-                        {
-                            foreach (var specialPrice in dto.SpecialDeliveryPrices)
-                            {
-                                var merchantSpecialPrice = new MerchantSpecialPrice
-                                {
-                                    MerchantId = newUser.Id,
-                                    CityId = specialPrice.cityId,
-                                    SpecialPrice = specialPrice.SpecialPreice
-                                };
-                                await _unit.Repository<MerchantSpecialPrice>().Add(merchantSpecialPrice);
-                            }
-                        }
-
-                        await _unit.Save();
-                        await transaction.CommitAsync();
-
-                        return (true, "Merchant created successfully.");
-                    }
-                    catch (Exception ex)
-                    {
-                        await transaction.RollbackAsync();
-                        return (false, $"An error occurred: {ex.Message}");
+                        await _unit.Repository<MerchantSpecialPrice>().Add(merchantSpecialPrice);
                     }
                 }
 
+                await _unit.Save();
+                await transaction.CommitAsync();
 
-            
-
+                return (true, "Merchant created successfully.");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return (false, $"An error occurred: {ex.Message}");
+            }
         }
         #endregion
 

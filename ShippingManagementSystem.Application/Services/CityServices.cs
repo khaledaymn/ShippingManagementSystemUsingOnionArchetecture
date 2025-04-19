@@ -21,7 +21,6 @@ namespace ShippingManagementSystem.Application.Services
             _unitOfWork = unitOfWork;
             _context = context;
         }
-
         public async Task<PaginationResponse<CityDTO>> GetAllCitiesAsync(CityParams param)
         {
             try
@@ -36,7 +35,6 @@ namespace ShippingManagementSystem.Application.Services
                     Name = c.Name,
                     ChargePrice = c.ChargePrice,
                     PickUpPrice = c.PickUpPrice,
-                    GovernorateId = c.GovernorateId,
                     GovernorateName = c.Governorate?.Name,
                     IsDeleted = c.IsDeleted
                 }).ToList();
@@ -53,7 +51,6 @@ namespace ShippingManagementSystem.Application.Services
                 throw new Exception("Error retrieving cities", ex);
             }
         }
-
         public async Task<CityDTO?> GetCityByIdAsync(int id)
         {
             try
@@ -70,7 +67,6 @@ namespace ShippingManagementSystem.Application.Services
                     Name = city.Name,
                     ChargePrice = city.ChargePrice,
                     PickUpPrice = city.PickUpPrice,
-                    GovernorateId = city.GovernorateId,
                     GovernorateName = city.Governorate?.Name,
                     IsDeleted = city.IsDeleted
                 };
@@ -80,7 +76,6 @@ namespace ShippingManagementSystem.Application.Services
                 throw new Exception($"Error retrieving city with id {id}", ex);
             }
         }
-
         public async Task<(bool IsSuccess, string Message)> CreateCityAsync(CreateCityDTO cityDTO)
         {
             try
@@ -109,64 +104,7 @@ namespace ShippingManagementSystem.Application.Services
                 return (false, $"Error creating city: {ex.Message}");
             }
         }
-
-        public async Task<(bool IsSuccess, string Message)> UpdateCityAsync(int id, CityDTO cityDTO)
-        {
-            try
-            {
-                var city = await _unitOfWork.Repository<City>().GetById(id);
-                
-                if (city == null)
-                    return (false, $"City with id {id} not found");
-                
-                bool governorateChanged = false;
-                
-                // Only update properties that are provided (not null/empty)
-                if (!string.IsNullOrEmpty(cityDTO.Name))
-                {
-                    city.Name = cityDTO.Name;
-                }
-                
-                // For numeric values, we'll assume a value of 0 or less means "don't update"
-                if (cityDTO.ChargePrice > 0)
-                {
-                    city.ChargePrice = cityDTO.ChargePrice;
-                }
-                
-                if (cityDTO.PickUpPrice > 0)
-                {
-                    city.PickUpPrice = cityDTO.PickUpPrice;
-                }
-                
-                if (cityDTO.GovernorateId > 0 && cityDTO.GovernorateId != city.GovernorateId)
-                {
-                    // Check if governorate exists
-                    var governorate = await _unitOfWork.Repository<Governorate>().GetById(cityDTO.GovernorateId);
-                    if (governorate == null)
-                        return (false, $"Governorate with id {cityDTO.GovernorateId} not found");
-                    
-                    city.GovernorateId = cityDTO.GovernorateId;
-                    governorateChanged = true;
-                }
-                
-                _unitOfWork.Repository<City>().Update(city);
-                await _unitOfWork.Save();
-                
-                string message = $"City '{city.Name}' updated successfully";
-                if (governorateChanged)
-                {
-                    message += " and moved to a different governorate";
-                }
-                
-                return (true, message);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Error updating city: {ex.Message}");
-            }
-        }
-
-        public async Task<(bool IsSuccess, EditCity)> EditCityAsync(EditCity cityDTO)
+        public async Task<(bool IsSuccess, EditCityDTO)> EditCityAsync(EditCityDTO cityDTO)
         {
             try
             {
@@ -181,23 +119,23 @@ namespace ShippingManagementSystem.Application.Services
                     city.Name = cityDTO.Name;
                 }
 
-                if (cityDTO.ChargePrice > 0)
+                if (cityDTO.ChargePrice!=null&&cityDTO.ChargePrice > 0)
                 {
-                    city.ChargePrice = cityDTO.ChargePrice;
+                    city.ChargePrice = cityDTO.ChargePrice??0;
                 }
 
-                if (cityDTO.PickUpPrice > 0)
+                if (cityDTO.PickUpPrice!=null&&cityDTO.PickUpPrice > 0)
                 {
-                    city.PickUpPrice = cityDTO.PickUpPrice;
+                    city.PickUpPrice = cityDTO.PickUpPrice??0;
                 }
 
-                if (cityDTO.GovernorateId > 0 && cityDTO.GovernorateId != city.GovernorateId)
+                if (cityDTO.GovernorateId!=null &&cityDTO.GovernorateId > 0 && cityDTO.GovernorateId != city.GovernorateId)
                 {
                     var governorate = await _unitOfWork.Repository<Governorate>().GetById(cityDTO.GovernorateId);
                     if (governorate == null)
                         return (false, null);
 
-                    city.GovernorateId = cityDTO.GovernorateId;
+                    city.GovernorateId = cityDTO.GovernorateId ?? 0;
                 }
 
                 _unitOfWork.Repository<City>().Update(city);
@@ -211,7 +149,6 @@ namespace ShippingManagementSystem.Application.Services
                 return (false, null);
             }
         }
-
         public async Task<(bool IsSuccess, string Message)> DeleteCityAsync(int id)
         {
             try

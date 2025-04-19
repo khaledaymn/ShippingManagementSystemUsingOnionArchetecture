@@ -20,6 +20,7 @@ namespace ShippingManagementSystem.Application.Services
             _unitOfWork = unitOfWork;
         }
 
+
         #region Get All Branches
         public async Task<PaginationResponse<GetBranchDTO>> GetAllBranchesAsync(BranchParams param)
         {
@@ -175,5 +176,6 @@ namespace ShippingManagementSystem.Application.Services
         }
 
         #endregion
+
     }
 } 

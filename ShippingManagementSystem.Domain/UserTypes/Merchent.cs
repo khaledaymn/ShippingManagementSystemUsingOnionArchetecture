@@ -5,13 +5,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ShippingManagementSystem.Domain.UserTypes
 {
-   
     public class Merchant
     {
-        public Merchant()
-        {
+        //public Merchant()
+        //{
 
-        }
+        //}
 
         //public Merchant( string id,MerchantDtoForAdding Merchanttoadd)
         //{
@@ -31,6 +30,6 @@ namespace ShippingManagementSystem.Domain.UserTypes
         public virtual List<MerchantCity>? MerchantCities { get; set; } = new List<MerchantCity>();
         public virtual List<MerchantSpecialPrice>? MerchantSpecialPrices { get; set; } = new List<MerchantSpecialPrice>();
         
-        //public virtual List<Order> MerchantOrders { get; } = new List<Order>();
+        public virtual List<Order> MerchantOrders { get; } = new List<Order>();
     }
 }

@@ -18,7 +18,8 @@ namespace ShippingManagementSystem.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<StandardDTO>> GetAllStandardsAsync()
+
+        public async Task<List<StandardDTO>> GetSettingAsync()
         {
             try
             {
@@ -30,28 +31,6 @@ namespace ShippingManagementSystem.Application.Services
             catch (Exception ex)
             {
                 throw new Exception("Error retrieving standards", ex);
-            }
-        }
-
-        public async Task<(bool IsSuccess, string Message)> CreateStandardAsync(CreateStandardDTO standardDTO)
-        {
-            try
-            {
-                var standard = new Standard
-                {
-                    StandardWeight = standardDTO.StandardWeight,
-                    VillagePrice = standardDTO.VillagePrice,
-                    KGprice = standardDTO.KGprice,
-                };
-                
-                _unitOfWork.Repository<Standard>().Add(standard);
-                await _unitOfWork.Save();
-                
-                return (true, $"Standard created successfully with ID: {standard.Id}");
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Error creating standard: {ex.Message}");
             }
         }
 

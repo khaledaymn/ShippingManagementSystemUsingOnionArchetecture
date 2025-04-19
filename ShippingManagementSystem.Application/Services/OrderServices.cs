@@ -23,6 +23,9 @@ namespace ShippingManagementSystem.Application.Services
             _unitOfWork = unitOfWork;
         }
 
+
+        #region Get All Orders
+
         public async Task<PaginationResponse<OrderDTO>> GetAllOrdersAsync(OrderParams param)
         {
             try
@@ -46,6 +49,10 @@ namespace ShippingManagementSystem.Application.Services
             }
         }
 
+        #endregion
+
+
+        #region Get Order By Id
         public async Task<OrderDTO?> GetOrderByIdAsync(int id)
         {
             try
@@ -64,6 +71,10 @@ namespace ShippingManagementSystem.Application.Services
             }
         }
 
+        #endregion
+
+
+        #region Get Orders By Status
         public async Task<List<OrderDTO>> GetOrdersByStatusAsync(string status)
         {
             try
@@ -78,6 +89,11 @@ namespace ShippingManagementSystem.Application.Services
                 throw new Exception($"Error retrieving orders with status {status}", ex);
             }
         }
+
+        #endregion
+
+
+        #region Get Products By Order Id
 
         public async Task<List<ProductDTO>> GetAllProductsByOrderIdAsync(int orderId)
         {
@@ -106,6 +122,10 @@ namespace ShippingManagementSystem.Application.Services
             }
         }
 
+        #endregion
+
+
+        #region Create Order
         public async Task<(bool IsSuccess, string Message)> CreateOrderAsync(CreateOrderDTO orderDTO)
         {
             try
@@ -183,6 +203,51 @@ namespace ShippingManagementSystem.Application.Services
             }
         }
 
+        #endregion
+
+
+        #region Assign Order To Delivary
+        public async Task<(bool IsSuccess, string Message)> AssignOrderToDelivaryAsync(int id, AssignOrderToDelivaryDTO statusDTO)
+        {
+            try
+            {
+                var order = await _unitOfWork.Repository<Order>().GetById(id);
+                
+                if (order == null)
+                    return (false, $"Order with id {id} not found");
+
+                if (order.OrderState != OrderState.New)
+                    return (false, $"Order already assigned to delivary.");
+                
+                // Update shipping representative if provided
+                if (!string.IsNullOrEmpty(statusDTO.ShippigRepresentativeId))
+                {
+                    var rep = await _unitOfWork.Repository<ShippigRepresentative>().GetById(statusDTO.ShippigRepresentativeId);
+                    if (rep == null)
+                        return (false, $"Shipping representative with id {statusDTO.ShippigRepresentativeId} not found");
+                    
+                    order.ShippigRepresentativeId = statusDTO.ShippigRepresentativeId;
+                    order.OrderState = OrderState.Pendding;
+                }
+                else
+                    return (false, $"Shipping representative ID is required");
+                                
+                
+                _unitOfWork.Repository<Order>().Update(order);
+                await _unitOfWork.Save();
+                
+                return (true, $"Order status updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error updating order status: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+
+        #region Update Order Status
         public async Task<(bool IsSuccess, string Message)> UpdateOrderStatusAsync(int id, UpdateOrderStatusDTO statusDTO)
         {
             try
@@ -204,28 +269,11 @@ namespace ShippingManagementSystem.Application.Services
                         return (false, $"Invalid order status: {statusDTO.OrderState}");
                     }
                 }
-                
-                // Update shipping representative if provided
-                if (!string.IsNullOrEmpty(statusDTO.ShippigRepresentativeId))
-                {
-                    var rep = await _unitOfWork.Repository<ShippigRepresentative>().GetById(statusDTO.ShippigRepresentativeId);
-                    if (rep == null)
-                        return (false, $"Shipping representative with id {statusDTO.ShippigRepresentativeId} not found");
-                    
-                    order.ShippigRepresentativeId = statusDTO.ShippigRepresentativeId;
-                }
-                
-                // Update amount received if provided
-                if (statusDTO.AmountReceived.HasValue)
-                {
-                    order.AmountReceived = statusDTO.AmountReceived.Value;
-                }
-                
+               
+
                 // Update notes if provided
                 if (!string.IsNullOrEmpty(statusDTO.Notes))
-                {
                     order.Notes = statusDTO.Notes;
-                }
                 
                 _unitOfWork.Repository<Order>().Update(order);
                 await _unitOfWork.Save();
@@ -238,6 +286,10 @@ namespace ShippingManagementSystem.Application.Services
             }
         }
 
+        #endregion
+
+
+        #region Delete Order
         public async Task<(bool IsSuccess, string Message)> DeleteOrderAsync(int id)
         {
             try
@@ -260,6 +312,11 @@ namespace ShippingManagementSystem.Application.Services
                 return (false, $"Error deleting order: {ex.Message}");
             }
         }
+
+        #endregion
+
+
+        #region Helper Methods
 
         private OrderDTO MapOrderToDTO(Order order)
         {
@@ -322,11 +379,15 @@ namespace ShippingManagementSystem.Application.Services
                 var chargeType = await _unitOfWork.Repository<ChargeType>().GetById(order.ChargeTypeId);
                 if (chargeType == null)
                     throw new Exception($"Charge type with id {order.ChargeTypeId} not found");
-                
-                //To Do : Spicial Price
 
-                // Basic city charge
-                chargePrice += city.ChargePrice;
+
+                var specialPrice = merchant.MerchantSpecialPrices.FirstOrDefault(x => x.CityId == order.CityId);
+                
+                if (specialPrice != null)
+                    chargePrice += specialPrice.SpecialPrice;
+                else
+                    chargePrice += city.ChargePrice;
+
                 
                 // Add village price if shipping to village
                 if (order.ShippingToVillage)
@@ -384,5 +445,8 @@ namespace ShippingManagementSystem.Application.Services
                     return 0;
             }
         }
+
+        #endregion
+
     }
 } 
