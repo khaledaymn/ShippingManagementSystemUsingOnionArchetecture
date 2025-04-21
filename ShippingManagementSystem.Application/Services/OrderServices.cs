@@ -216,7 +216,7 @@ namespace ShippingManagementSystem.Application.Services
                 if (order == null)
                     return (false, $"Order with id {id} not found");
 
-                if (order.OrderState != OrderState.New)
+                if (order.OrderState == OrderState.Pendding)
                     return (false, $"Order already assigned to delivary.");
                 
                 // Update shipping representative if provided
@@ -336,17 +336,11 @@ namespace ShippingManagementSystem.Application.Services
                 OrderPrice = order.OrderPrice,
                 TotalWeight = order.TotalWeight,
                 IsDeleted = order.IsDeleted,
-                ShippingToVillage = order.ShippingToVillage,
                 AmountReceived = order.AmountReceived,
-                CityId = order.CityId,
                 CityName = order.City?.Name,
-                ChargeTypeId = order.ChargeTypeId,
                 ChargeTypeName = order.ChargeType?.Name,
-                BranchId = order.BranchId,
                 BranchName = order.Branches?.Name,
-                MerchantId = order.MerchantId,
                 MerchantName = order.Merchant?.StoreName,
-                ShippigRepresentativeId = order.ShippigRepresentativeId,
                 ShippigRepresentativeName = order.ShippigRepresentative?.User.Name,
                 Products = order.Products?.Select(p => new ProductDTO
                 {

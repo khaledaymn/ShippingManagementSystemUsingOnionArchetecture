@@ -36,5 +36,18 @@ namespace ShippingManagementSystem.Web.Controllers
                 
             return Ok(result.Message);
         }
+
+        [HttpGet]
+        [Route("~/Standard/GetSetting")]
+        //[Authorize(Policy = Settings.View)]
+        public async Task<IActionResult> GetSetting()
+        {
+            var standards = await _unitOfWork.standardServices.GetSettingAsync();
+
+            if (standards == null || standards.Count == 0)
+                return NotFound("No standards found");
+
+            return Ok(standards);
+        }
     }
 } 

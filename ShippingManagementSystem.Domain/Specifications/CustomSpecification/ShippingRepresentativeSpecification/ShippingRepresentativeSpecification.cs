@@ -55,18 +55,12 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Shi
                 switch (param.Sort.ToLower())
                 {
                     case "name":
-                            ApplyOrderByDescending(sr => sr.User.Name);
-                        else
                             ApplyOrderBy(sr => sr.User.Name);
                         break;
                     case "email":
-                            ApplyOrderByDescending(sr => sr.User.Email);
-                        else
                             ApplyOrderBy(sr => sr.User.Email);
                         break;
                     case "companypercentage":
-                            ApplyOrderByDescending(sr => sr.CompanyPersentage);
-                        else
                             ApplyOrderBy(sr => sr.CompanyPersentage);
                         break;
                     default:
