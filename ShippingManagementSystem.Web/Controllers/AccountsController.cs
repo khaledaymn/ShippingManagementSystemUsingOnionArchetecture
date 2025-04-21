@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ShippingManagementSystem.Application.DTOs.AuthenticationDTOs;
 using ShippingManagementSystem.Application.UnitOfWork;
+using ShippingManagementSystem.Domain.DTOs.AuthenticationDTOs;
 
 namespace ShippingManagementSystem.Web.Controllers
 {
@@ -336,6 +337,120 @@ namespace ShippingManagementSystem.Web.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while changing your password", error = ex.Message });
+            }
+        }
+        #endregion
+
+
+        #region GetSpecificUserData
+        /// <summary>
+        /// Initiates Get Specific User Data.
+        /// </summary>
+        /// <param name="id">The id to get specific user data.</param>
+        /// <returns>
+        /// Returns a user data if request is processed, or an error message if it fails.
+        /// </returns>
+        /// <remarks>
+        /// This endpoint validates the user's id and gets his/her data.
+        /// The request body must contain a valid id.
+        /// 
+        /// Example Request:
+        ///
+        /// </remarks>
+        /// <response code="200">
+        /// Returns a confirmation message when the data is successfully processed.
+        /// Successful Response (200 OK):
+        ///
+        /// </response>
+        /// <response code="400">
+        /// Returned when the request is malformed or the id is invalid.
+        /// Bad Request Response (400):
+        ///
+        /// </response>
+        /// <response code="404">
+        /// Returned when the provided id is not found or the request cannot be processed.
+        /// Not Found Response (404):
+        ///
+        /// </response>
+        /// <response code="500">
+        /// Returned when an unexpected server error occurs during processing.
+        /// Server Error Response (500):
+        ///
+        /// </response>
+        [HttpGet]
+        [Route("~/Account/GetSpecificUserData/{id}")]
+        public async Task<IActionResult> GetSpecificUserData(string id)
+        {
+            try
+            {
+                var userdata = await _unitOfWork.AuthenticationService.GetSpecificUser(id);
+                if (userdata == null)
+                {
+                    return NotFound("User not found");
+                }
+                return Ok(userdata);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing your request", error = ex.Message });
+            }
+        }
+        #endregion
+
+
+        #region Update User Data
+        /// <summary>
+        /// Initiates Update User Data.
+        /// </summary>
+        /// <param name="dto">The dto is the object that contained user updated data .</param>
+        /// <returns>
+        /// Returns a user data if request is processed, or an error message if it fails.
+        /// </returns>
+        /// <remarks>
+        /// This endpoint validates the object of dto members and updates his/her data.
+        /// The request body must contain a valid data .
+        /// 
+        /// Example Request:
+        ///
+        /// </remarks>
+        /// <response code="200">
+        /// Returns a confirmation message when the data is successfully processed.
+        /// Successful Response (200 OK):
+        ///
+        /// </response>
+        /// <response code="400">
+        /// Returned when the request is malformed or the data is invalid.
+        /// Bad Request Response (400):
+        ///
+        /// </response>
+        /// <response code="404">
+        /// Returned when the provided id is not found or the request cannot be processed.
+        /// Not Found Response (404):
+        ///
+        /// </response>
+        /// <response code="500">
+        /// Returned when an unexpected server error occurs during processing.
+        /// Server Error Response (500):
+        ///
+        /// </response>
+        [HttpPut]
+        [Route("~/Account/EditProfile")]
+        public async Task<IActionResult> UpdateUserData(SpecificUserDataDTo dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid || string.IsNullOrEmpty(dto.id))
+                    return BadRequest(new { Message = "Invalid user data." });
+
+                var (isSuccess, message) = await _unitOfWork.AuthenticationService.UpdateUserData(dto);
+                if (!isSuccess)
+                    return BadRequest(new { Message = message });
+
+                return Ok(new { Message = message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = $"An error occurred: {ex.Message}" });
             }
         }
         #endregion

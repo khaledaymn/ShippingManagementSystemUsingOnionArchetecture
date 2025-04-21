@@ -145,12 +145,13 @@ namespace ShippingManagementSystem.Application.Services
                     await _unitOfWork.RollbackAsync();
                     return (false, $"Group with id {id} not found");
                 }
-
-                if(groupDTO.Permissions != null && groupDTO.Permissions.Count > 0)
+                if (groupDTO.Permissions != null && groupDTO.Permissions.Count > 0)
                 {
                     // Clear existing permissions
                     var existingPermissions = await _unitOfWork.Repository<GroupMedule>().GetAll();
                     await _unitOfWork.Repository<GroupMedule>().DeleteRange(existingPermissions.Where(g => g.GroupId == groupDTO.Id));
+
+                    var Id = group.Id;
 
                     // Add new permissions
                     foreach (var item in groupDTO.Permissions)
@@ -159,7 +160,7 @@ namespace ShippingManagementSystem.Application.Services
                         {
                             var groupMedule = new GroupMedule
                             {
-                                GroupId = group.Id,
+                                GroupId = Id,
                                 MeduleId = item.Id,
                                 Permission = (Permission)value
                             };

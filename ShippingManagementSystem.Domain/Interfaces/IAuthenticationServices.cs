@@ -1,4 +1,5 @@
 ﻿using ShippingManagementSystem.Application.DTOs.AuthenticationDTOs;
+using ShippingManagementSystem.Domain.DTOs.AuthenticationDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,8 @@ namespace ShippingManagementSystem.Domain.Interfaces
         Task<string> ForgetPassword(ForgetPasswordDTO dto);
         Task<string> ResetPassword(ResetPasswordDTO dto);
         Task<string> ChangePassword(ChangePasswordDTO dto);
+        Task<SpecificUserDataDTo> GetSpecificUser(string id);
+        Task<(bool IsSuccess, string Message)> UpdateUserData(SpecificUserDataDTo dto);
+
     }
 }

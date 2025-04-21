@@ -6,6 +6,7 @@ using ShippingManagementSystem.Application.DTOs.AuthenticationDTOs;
 using ShippingManagementSystem.Application.Helpers;
 using ShippingManagementSystem.Application.Settings;
 using ShippingManagementSystem.Application.UnitOfWork;
+using ShippingManagementSystem.Domain.DTOs.AuthenticationDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
 using ShippingManagementSystem.Domain.UserTypes;
 using System;
@@ -264,6 +265,80 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
                 expires: DateTime.UtcNow.AddDays(_jwt.DurationInDays),
                 signingCredentials: signingCredentials);
             return JWTSecurityToken;
+        }
+
+        #endregion
+
+
+        #region Get User By Id
+        public async Task<SpecificUserDataDTo> GetSpecificUser(string id)
+        {
+            if (id == null || string.IsNullOrEmpty(id))
+                return null;
+
+
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+                return null;
+
+            return new SpecificUserDataDTo
+            {
+                id = user.Id,
+                DisplayName = user.Name,
+                UserName = user.UserName,
+                Address = user.Address,
+                email = user.Email,
+                PhoneNumber = user.PhoneNumber
+
+            };
+        }
+
+        #endregion
+
+
+        #region UpdateUserData
+        public async Task<(bool IsSuccess, string Message)> UpdateUserData(SpecificUserDataDTo dto)
+        {
+            if (dto == null || string.IsNullOrEmpty(dto.id))
+                return (false, "Invalid user data.");
+            var user = await _userManager.FindByIdAsync(dto.id);
+            if (user == null)
+                return (false, "User not found.");
+
+
+
+
+
+            using (var transaction = await _unitOfWork.BeginTransactionAsync())
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(dto.DisplayName))
+                        user.Name = dto.DisplayName;
+                    if (!string.IsNullOrEmpty(dto.UserName))
+                        user.UserName = dto.UserName;
+                    if (!string.IsNullOrEmpty(dto.Address))
+                        user.Address = dto.Address;
+                    if (!string.IsNullOrEmpty(dto.email))
+                        user.Email = dto.email;
+                    if (!string.IsNullOrEmpty(dto.PhoneNumber))
+                        user.UserName = dto.PhoneNumber;
+                    var result = await _userManager.UpdateAsync(user);
+
+
+
+                    await transaction.CommitAsync();
+
+                    return (true, "user updated successfully.");
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return (false, $"An error occurred: {ex.Message}");
+                }
+            }
         }
 
         #endregion
