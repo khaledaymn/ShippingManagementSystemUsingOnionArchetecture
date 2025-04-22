@@ -227,7 +227,7 @@ namespace ShippingManagementSystem.Application.Services
                         return (false, $"Shipping representative with id {statusDTO.ShippigRepresentativeId} not found");
                     
                     order.ShippigRepresentativeId = statusDTO.ShippigRepresentativeId;
-                    order.OrderState = OrderState.Pendding;
+                    order.OrderState = OrderState.DeliveredToTheRepresentative;
                 }
                 else
                     return (false, $"Shipping representative ID is required");

@@ -18,5 +18,6 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Mer
         public string? Search { get; set; }
         public string? SortBy { get; set; }
         public string? SortDirection { get; set; } = "asc";
+        public bool? IsDeleted { get; set; }
     }
 }
