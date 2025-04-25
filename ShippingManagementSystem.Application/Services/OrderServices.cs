@@ -216,7 +216,7 @@ namespace ShippingManagementSystem.Application.Services
                 if (order == null)
                     return (false, $"Order with id {id} not found");
 
-                if (order.OrderState == OrderState.Pendding)
+                if (order.OrderState != OrderState.Pendding)
                     return (false, $"Order already assigned to delivary.");
                 
                 // Update shipping representative if provided
