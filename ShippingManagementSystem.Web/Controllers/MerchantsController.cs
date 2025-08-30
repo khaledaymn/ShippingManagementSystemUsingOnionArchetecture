@@ -1,7 +1,12 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Shipping_Project.DTOs.MerchantDtos;
+using ShippingManagementSystem.Application.Helper;
 using ShippingManagementSystem.Application.UnitOfWork;
+using ShippingManagementSystem.Domain.DTOs;
+using ShippingManagementSystem.Domain.DTOs.MerchantDtos;
+using ShippingManagementSystem.Domain.DTOs.MerchantDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
 using ShippingManagementSystem.Domain.Specifications.CustomSpecification.MerchantSpecification;
 
@@ -9,6 +14,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MerchantsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -22,7 +28,11 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Merchants/GetAll")]
-        public async Task<ActionResult<IReadOnlyList<GovernoratePaginationForCount<MerchantDTO>>>> GetAll([FromQuery] MerchantParams param)
+        [Authorize(Policy =
+            $"Permission={Merchants.View};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
+        public async Task<ActionResult> GetAll([FromQuery] MerchantParams param)
         {
             try
             {
@@ -42,7 +52,11 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/Merchants/Add")]
-        public async Task<ActionResult> Add(MerchantDtoForAdding dto)
+        [Authorize(Policy =
+            $"Permission={Merchants.Create};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
+        public async Task<ActionResult> Add(AddMerchantDTO dto)
         {
             try
             {
@@ -70,7 +84,11 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/Merchants/Update")]
-        public async Task<ActionResult> Update(MerchecntForEditingAndGetting dto)
+        [Authorize(Policy =
+            $"Permission={Merchants.Edit};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
+        public async Task<ActionResult> Update(UpdateMerchantDTO dto)
         {
             try
             {
@@ -96,6 +114,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpDelete]
         [Route("~/Merchants/Delete/{id}")]
+        [Authorize(Policy =
+            $"Permission={Merchants.Delete};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<ActionResult> Delete(string id)
         {
             try
@@ -119,7 +141,11 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Merchants/GetById/{id}")]
-        public async Task<ActionResult<MerchecntForEditingAndGetting>> GetById(string id)
+        [Authorize(Policy =
+            $"Permission={Merchants.View};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
+        public async Task<ActionResult<MerchantDTO>> GetById(string id)
         {
             try
             {

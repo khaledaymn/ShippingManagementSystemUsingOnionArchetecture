@@ -20,6 +20,12 @@ namespace ShippingManagementSystem.Domain.Specifications.ChargeTypeSpecification
             {
                 switch (param.Sort.ToLower())
                 {
+                    case "id_asc":
+                        ApplyOrderBy(x => x.Id);
+                        break;
+                    case "id_desc":
+                        ApplyOrderByDescending(x => x.Id);
+                        break;
                     case "name_asc":
                         ApplyOrderBy(x => x.Name);
                         break;

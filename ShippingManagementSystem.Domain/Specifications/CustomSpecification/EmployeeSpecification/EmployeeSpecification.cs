@@ -15,16 +15,11 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Emp
 
         public EmployeeSpecification(EmployeeParams param)
         {
-            Criteria = m => !m.User.IsDeleted;
-            ArgumentNullException.ThrowIfNull(param);
 
             Criteria = e =>
                 (string.IsNullOrEmpty(param.Search) ||
-                    e.User.Name.Contains(param.Search, StringComparison.OrdinalIgnoreCase) ||
-                    e.User.Email.Contains(param.Search, StringComparison.OrdinalIgnoreCase) ||
-                    e.User.PhoneNumber.Contains(param.Search, StringComparison.OrdinalIgnoreCase)) &&
-                (string.IsNullOrEmpty(param.Branch) ||
-                    e.User.UserBranches.Any(ub => ub.Branch.Name.Contains(param.Branch, StringComparison.OrdinalIgnoreCase))) &&
+                    e.User.Name.ToLower().Contains(param.Search.ToLower()) ||
+                    e.User.Email.ToLower().Contains(param.Search.ToLower())) &&
                 (!param.IsActive.HasValue || e.User.IsDeleted == !param.IsActive);
 
             if (!string.IsNullOrEmpty(param.Sort))
@@ -34,20 +29,14 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Emp
                     case "name":
                         ApplyOrderBy(e => e.User.Name);
                         break;
-                    case "namedesc":
+                    case "name_desc":
                         ApplyOrderByDescending(e => e.User.Name);
                         break;
                     case "email":
                         ApplyOrderBy(e => e.User.Email);
                         break;
-                    case "emaildesc":
+                    case "email_desc":
                         ApplyOrderByDescending(e => e.User.Email);
-                        break;
-                    case "phone":
-                        ApplyOrderBy(e => e.User.PhoneNumber);
-                        break;
-                    case "phonedesc":
-                        ApplyOrderByDescending(e => e.User.PhoneNumber);
                         break;
                     default:
                         ApplyOrderBy(e => e.User.Name);

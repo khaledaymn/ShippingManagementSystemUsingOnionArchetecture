@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.MerhantSpeialPricesSpeifications
 {
   public class MerchantSpecialSpecifications:BaseSpecification<MerchantSpecialPrice>
-    {
+   {
         public MerchantSpecialSpecifications(MerchantSpecialPricesParams param) : base(x =>
            (string.IsNullOrEmpty(param.Search) || x.City.Name.ToLower().Contains(param.Search.ToLower())) 
            )

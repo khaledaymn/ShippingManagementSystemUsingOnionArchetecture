@@ -6,10 +6,6 @@ using ShippingManagementSystem.Domain.Enums;
 using ShippingManagementSystem.Domain.Interfaces;
 using ShippingManagementSystem.Domain.Specifications.OrderSpecification;
 using ShippingManagementSystem.Application.UnitOfWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ShippingManagementSystem.Domain.UserTypes;
 
 namespace ShippingManagementSystem.Application.Services
@@ -156,11 +152,11 @@ namespace ShippingManagementSystem.Application.Services
                 // Create order
                 var order = new Order
                 {
-                    CreationDate = DateTime.UtcNow,
+                    CreationDate = DateTime.Now,
                     CustomerName = orderDTO.CustomerName,
                     CustomerPhone1 = orderDTO.CustomerPhone1,
                     CustomerPhone2 = orderDTO.CustomerPhone2,
-                    VillageAndStreet = orderDTO.VillageAndStreet,
+                    VillageAndStreet = orderDTO.ShippingToVillage ? orderDTO.VillageAndStreet : null,
                     Notes = orderDTO.Notes,
                     OrderPrice = orderDTO.OrderPrice,
                     ChargePrice = chargePrice,
@@ -176,7 +172,7 @@ namespace ShippingManagementSystem.Application.Services
                     AmountReceived = CalculateAmountReceived(orderDTO.PaymentType, orderDTO.OrderPrice)
                 };
                 
-                _unitOfWork.Repository<Order>().Add(order);
+                await _unitOfWork.Repository<Order>().Add(order);
                 await _unitOfWork.Save();
                 
                 // Add products
@@ -190,7 +186,7 @@ namespace ShippingManagementSystem.Application.Services
                         OrderId = order.Id
                     };
                     
-                    _unitOfWork.Repository<Product>().Add(product);
+                    await _unitOfWork.Repository<Product>().Add(product);
                 }
                 
                 await _unitOfWork.Save();
@@ -216,17 +212,26 @@ namespace ShippingManagementSystem.Application.Services
                 if (order == null)
                     return (false, $"Order with id {id} not found");
 
+                if(order.OrderState == OrderState.New)
+                    return (false, $"Order is in New state and cannot be assigned to delivery representative.");
+
+                if (order.OrderState == OrderState.DeliveredToTheRepresentative)
+                    return (false, $"Order already assigned to delivery representative.");
+                
+                if ( order.IsDeleted)
+                    return (false, $"Order is deleted and cannot be assigned to delivery.");
+
                 if (order.OrderState != OrderState.Pendding)
                     return (false, $"Order already assigned to delivary.");
                 
                 // Update shipping representative if provided
-                if (!string.IsNullOrEmpty(statusDTO.ShippigRepresentativeId))
+                if (!string.IsNullOrEmpty(statusDTO.ShippingRepresentativeId))
                 {
-                    var rep = await _unitOfWork.Repository<ShippigRepresentative>().GetById(statusDTO.ShippigRepresentativeId);
+                    var rep = await _unitOfWork.Repository<ShippigRepresentative>().GetById(statusDTO.ShippingRepresentativeId);
                     if (rep == null)
-                        return (false, $"Shipping representative with id {statusDTO.ShippigRepresentativeId} not found");
+                        return (false, $"Shipping representative with id {statusDTO.ShippingRepresentativeId} not found");
                     
-                    order.ShippigRepresentativeId = statusDTO.ShippigRepresentativeId;
+                    order.ShippingRepresentativeId = statusDTO.ShippingRepresentativeId;
                     order.OrderState = OrderState.DeliveredToTheRepresentative;
                 }
                 else
@@ -299,7 +304,9 @@ namespace ShippingManagementSystem.Application.Services
                 if (order == null)
                     return (false, $"Order with id {id} not found");
                 
-                // Soft delete
+                if(order.OrderState != OrderState.New)
+                    return (false, $"Order cannot be deleted as it is not in New state.");
+                
                 order.IsDeleted = !order.IsDeleted;
                 _unitOfWork.Repository<Order>().Update(order);
                 
@@ -340,8 +347,9 @@ namespace ShippingManagementSystem.Application.Services
                 CityName = order.City?.Name,
                 ChargeTypeName = order.ChargeType?.Name,
                 BranchName = order.Branches?.Name,
-                MerchantName = order.Merchant?.StoreName,
-                ShippigRepresentativeName = order.ShippigRepresentative?.User.Name,
+                MerchantName = order.Merchant?.User.Name,
+                ShippingRepresentativeName = order.ShippingRepresentative?.User.Name,
+                IsShippingToVillage = order.ShippingToVillage,
                 Products = order.Products?.Select(p => new ProductDTO
                 {
                     Id = p.Id,
@@ -375,7 +383,7 @@ namespace ShippingManagementSystem.Application.Services
                     throw new Exception($"Charge type with id {order.ChargeTypeId} not found");
 
 
-                var specialPrice = merchant.MerchantSpecialPrices.FirstOrDefault(x => x.CityId == order.CityId);
+                var specialPrice = merchant?.MerchantSpecialPrices?.FirstOrDefault(x => x.CityId == order.CityId);
                 
                 if (specialPrice != null)
                     chargePrice += specialPrice.SpecialPrice;
@@ -442,5 +450,112 @@ namespace ShippingManagementSystem.Application.Services
 
         #endregion
 
+
+        #region Add Range
+
+        public async Task<(bool IsSuccess, string Message)> CreateOrdersAsync(IEnumerable<CreateOrderDTO> orderDTOs)
+        {
+            try
+            {
+                var orders = new List<Order>();
+                var products = new List<Product>();
+                var createdOrderIds = new List<int>();
+
+                // Validate relationships for all orders
+                foreach (var orderDTO in orderDTOs)
+                {
+                    var city = await _unitOfWork.Repository<City>().GetById(orderDTO.CityId);
+                    if (city == null)
+                        return (false, $"City with id {orderDTO.CityId} not found for order with CustomerName {orderDTO.CustomerName}");
+
+                    var chargeType = await _unitOfWork.Repository<ChargeType>().GetById(orderDTO.ChargeTypeId);
+                    if (chargeType == null)
+                        return (false, $"Charge type with id {orderDTO.ChargeTypeId} not found for order with CustomerName {orderDTO.CustomerName}");
+
+                    var branch = await _unitOfWork.Repository<Branch>().GetById(orderDTO.BranchId);
+                    if (branch == null)
+                        return (false, $"Branch with id {orderDTO.BranchId} not found for order with CustomerName {orderDTO.CustomerName}");
+
+                    var merchant = await _unitOfWork.Repository<Merchant>().GetById(orderDTO.MerchantId);
+                    if (merchant == null)
+                        return (false, $"Merchant with id {orderDTO.MerchantId} not found for order with CustomerName {orderDTO.CustomerName}");
+
+                    // Calculate total weight from products
+                    int totalWeight = orderDTO.Products.Sum(p => p.Weight * p.Quantity);
+
+                    // Calculate charge price
+                    double chargePrice = await CalculateChargePrice(orderDTO, totalWeight);
+
+                    // Create order
+                    var order = new Order
+                    {
+                        CreationDate = DateTime.Now,
+                        CustomerName = orderDTO.CustomerName,
+                        CustomerPhone1 = orderDTO.CustomerPhone1,
+                        CustomerPhone2 = orderDTO.CustomerPhone2,
+                        VillageAndStreet = orderDTO.ShippingToVillage ? orderDTO.VillageAndStreet : null,
+                        Notes = orderDTO.Notes,
+                        OrderPrice = orderDTO.OrderPrice,
+                        ChargePrice = chargePrice,
+                        OrderState = OrderState.New,
+                        OrderType = Enum.Parse<OrderType>(orderDTO.OrderType),
+                        PaymentType = Enum.Parse<PaymentType>(orderDTO.PaymentType),
+                        TotalWeight = totalWeight,
+                        ShippingToVillage = orderDTO.ShippingToVillage,
+                        CityId = orderDTO.CityId,
+                        ChargeTypeId = orderDTO.ChargeTypeId,
+                        BranchId = orderDTO.BranchId,
+                        MerchantId = orderDTO.MerchantId,
+                        AmountReceived = CalculateAmountReceived(orderDTO.PaymentType, orderDTO.OrderPrice)
+                    };
+
+                    orders.Add(order);
+
+                    // Prepare products for this order
+                    foreach (var productDTO in orderDTO.Products)
+                    {
+                        var product = new Product
+                        {
+                            Name = productDTO.Name,
+                            Weight = productDTO.Weight,
+                            Quantity = productDTO.Quantity,
+                            OrderId = order.Id // Note: Order.Id will be set after saving orders
+                        };
+                        products.Add(product);
+                    }
+                }
+
+                // Add all orders in bulk
+                await _unitOfWork.Repository<Order>().AddRange(orders);
+                await _unitOfWork.Save();
+
+                // Update OrderId for products after orders are saved
+                for (int i = 0; i < orders.Count; i++)
+                {
+                    var order = orders[i];
+                    createdOrderIds.Add(order.Id);
+                    var orderProducts = products
+                        .Skip(orderDTOs.Take(i).Sum(dto => dto.Products.Count))
+                        .Take(orderDTOs.ElementAt(i).Products.Count)
+                        .ToList();
+                    foreach (var product in orderProducts)
+                    {
+                        product.OrderId = order.Id;
+                    }
+                }
+
+                // Add all products in bulk
+                await _unitOfWork.Repository<Product>().AddRange(products);
+                await _unitOfWork.Save();
+
+                return (true, $"Orders created successfully with IDs: {string.Join(", ", createdOrderIds)}");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error creating orders: {ex.Message}");
+            }
+        }
+
+        #endregion
     }
 } 

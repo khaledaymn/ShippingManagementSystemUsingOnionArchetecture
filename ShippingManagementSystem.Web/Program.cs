@@ -17,7 +17,7 @@ using ShippingManagementSystem.Domain.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using ShippingManagementSystem.Application.Helpers;
+using ShippingManagementSystem.Application.Helper;
 
 #endregion
 
@@ -38,29 +38,17 @@ builder.Services.AddControllers();
 
 #region Permission Configration
 
-//builder.Services.AddAuthorization(options =>
-//{
-//    options.AddPolicy("AdminOrMerchantOrShippingRepOrHasPermission", policy =>
-//        policy.RequireAssertion(context =>
-//            // ????? 1: ?? ?? ??? ???????
-//            context.User.IsInRole(Roles.Admin) ||
-//            context.User.IsInRole(Roles.Merchant) ||
-//            context.User.IsInRole(Roles.ShippingRepresentative) ||
-
-//            // ????? 2: ?? ???? ????????
-//            context.User.HasClaim(c =>
-//                c.Type == Constants.Permission &&
-//                c.Value == $"{Medules.ShippingRepresentatives}.{Constants.View}")
-//        ));
-//});
-
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
-builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionOrRolesHandler>();
 
-builder.Services.Configure<SecurityStampValidatorOptions>(options =>
-{
-    options.ValidationInterval = TimeSpan.Zero;
-});
+//builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+//builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+//builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+//{
+//    options.ValidationInterval = TimeSpan.Zero;
+//});
 
 #endregion
 
@@ -98,7 +86,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowOrigins",
         builder =>
         {
-            builder.WithOrigins("http://localhost:4200", "http://localhost:50534", "http://localhost:60711")
+            builder.WithOrigins("http://localhost:4200", 
+                "https://shippnigmanagementsystem.vercel.app",
+                "https://shipping-management-system.vercel.app")
                    .AllowAnyMethod()
                    .AllowAnyHeader()
                    .AllowCredentials();

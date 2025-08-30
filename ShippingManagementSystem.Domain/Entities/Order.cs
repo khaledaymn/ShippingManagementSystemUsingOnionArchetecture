@@ -11,7 +11,7 @@ namespace ShippingManagementSystem.Domain.Entities
         public string CustomerName { get; set; }
         public string CustomerPhone1 { get; set; }
         public string? CustomerPhone2 { get; set; }
-        public string VillageAndStreet { get; set; }
+        public string? VillageAndStreet { get; set; }
         public string? Notes { get; set; }
         public double ChargePrice { get; set; }
         public OrderState OrderState { get; set; }
@@ -36,8 +36,8 @@ namespace ShippingManagementSystem.Domain.Entities
         public string MerchantId { get; set; }
         public virtual Merchant? Merchant { get; set; }
         [ForeignKey("ShippigRepresentative")]
-        public string? ShippigRepresentativeId { get; set; }
-        public virtual ShippigRepresentative? ShippigRepresentative { get; set; }
-        public virtual List<Product>? Products { get; }=new List<Product>();
+        public string? ShippingRepresentativeId { get; set; }
+        public virtual ShippigRepresentative? ShippingRepresentative { get; set; }
+        public virtual List<Product>? Products { get; } = new List<Product>();
     }
 }

@@ -79,6 +79,12 @@ namespace ShippingManagementSystem.Application.Services
         {
             try
             {
+                if(string.IsNullOrEmpty(chargeTypeDTO.Name) || chargeTypeDTO.ExtraPrice <= 0 || chargeTypeDTO.NumOfDay <= 0)
+                    return (false, "Invalid charge type data provided");
+               
+                if(_unitOfWork.Repository<ChargeType>().Any(x => x.Name.ToLower() == chargeTypeDTO.Name.ToLower()))
+                    return (false, $"Charge type with name '{chargeTypeDTO.Name}' already exists");
+               
                 var chargeType = new ChargeType
                 {
                     Name = chargeTypeDTO.Name,

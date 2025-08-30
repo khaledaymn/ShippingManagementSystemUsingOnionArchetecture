@@ -2,17 +2,21 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ShippingManagementSystem.Application.Helpers;
+using ShippingManagementSystem.Application.DTOs.AuthenticationDTOs;
+using ShippingManagementSystem.Application.Helper;
 using ShippingManagementSystem.Application.UnitOfWork;
+using ShippingManagementSystem.Domain.DTOs.AuthenticationDTOs;
 using ShippingManagementSystem.Domain.DTOs.EmployeeDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
 using ShippingManagementSystem.Domain.Specifications.CustomSpecification.EmployeeSpecification;
+using System;
+using System.Threading.Tasks;
 
 namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class EmployeesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -25,7 +29,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Employees/GetAll")]
-        //[Authorize(Policy = Employees.View)]
+        [Authorize(Policy =
+            $"Permission={Employees.View};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<ActionResult<IReadOnlyList<EmployeeDTO>>> GetAll([FromQuery] EmployeeParams param)
         {
             try
@@ -46,7 +53,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/Employees/Add")]
-        //[Authorize(Policy = Employees.Create)]
+        [Authorize(Policy =
+            $"Permission={Employees.Create};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<ActionResult> Add(AddEmployeeDTO dto)
         {
             try
@@ -73,7 +83,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/Employees/Update")]
-        //[Authorize(Policy = Employees.Edit)]
+        [Authorize(Policy =
+            $"Permission={Employees.Edit};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<ActionResult> Update(UpdateEmployeeDTO dto)
         {
             try
@@ -85,7 +98,7 @@ namespace ShippingManagementSystem.Web.Controllers
                 if (!isSuccess)
                     return BadRequest(new { Message = message });
 
-                return Ok(new { Message = message });
+                return Ok(message);
             }
             catch (Exception ex)
             {
@@ -100,7 +113,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpDelete]
         [Route("~/Employees/Delete/{id}")]
-        //[Authorize(Policy = Employees.Delete)]
+        [Authorize(Policy =
+            $"Permission={Employees.Delete};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<ActionResult> Delete(string id)
         {
             try
@@ -109,7 +125,7 @@ namespace ShippingManagementSystem.Web.Controllers
                 if (!isSuccess)
                     return BadRequest(new { Message = message });
 
-                return Ok(new { Message = message });
+                return Ok(message);
             }
             catch (Exception ex)
             {
@@ -124,6 +140,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Employees/GetById/{id}")]
+        [Authorize(Policy =
+            $"Permission={Employees.View};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<ActionResult<EmployeeDTO>> GetById(string id)
         {
             try
@@ -141,6 +161,92 @@ namespace ShippingManagementSystem.Web.Controllers
             }
         }
 
+        #endregion
+
+
+        #region Change Password
+
+        [HttpPost]
+        [Route("~/Account/ChangePassword")]
+        [Authorize(Roles =
+            $"{Roles.Admin},{Roles.Merchant}," +
+            $"{Roles.ShippingRepresentative},{Roles.Employee}")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var result = await _unitOfWork.AuthenticationService.ChangePassword(model);
+
+                if (result != "Password changed successfully.")
+                {
+                    return NotFound(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while changing your password", error = ex.Message });
+            }
+        }
+        #endregion
+
+
+        #region GetSpecificUserData
+
+        [HttpGet]
+        [Route("~/Account/GetSpecificUserData/{id}")]
+        [Authorize(Roles =
+            $"{Roles.Admin},{Roles.Merchant}," +
+            $"{Roles.ShippingRepresentative},{Roles.Employee}")]
+        public async Task<IActionResult> GetSpecificUserData(string id)
+        {
+            try
+            {
+                var userdata = await _unitOfWork.AuthenticationService.GetSpecificUser(id);
+                if (userdata == null)
+                {
+                    return NotFound("User not found");
+                }
+                return Ok(userdata);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing your request", error = ex.Message });
+            }
+        }
+        
+        #endregion
+
+
+        #region Update User Data
+
+        [HttpPut]
+        [Route("~/Account/EditProfile")]
+        [Authorize(Roles =
+            $"{Roles.Admin},{Roles.Merchant}," +
+            $"{Roles.ShippingRepresentative},{Roles.Employee}")]
+        public async Task<IActionResult> UpdateUserData(SpecificUserDataDTO dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid || string.IsNullOrEmpty(dto.Id))
+                    return BadRequest(new { Message = "Invalid user data." });
+
+                var (isSuccess, message) = await _unitOfWork.AuthenticationService.UpdateUserData(dto);
+                if (!isSuccess)
+                    return BadRequest(new { Message = message });
+
+                return Ok(new { Message = message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = $"An error occurred: {ex.Message}" });
+            }
+        }
         #endregion
     }
 }

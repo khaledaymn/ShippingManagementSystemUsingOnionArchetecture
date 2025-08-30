@@ -15,7 +15,7 @@ using ShippingManagementSystem.Domain.DTOs.BranchDTOs;
 using ShippingManagementSystem.Domain.DTOs;
 using ShippingManagementSystem.Infrastructure.Data;
 using System.Security.Claims;
-using ShippingManagementSystem.Application.Helpers;
+using ShippingManagementSystem.Application.Helper;
 
 namespace ShippingManagementSystem.Domain.Services
 {
@@ -37,6 +37,9 @@ namespace ShippingManagementSystem.Domain.Services
         {
             if (dto == null || string.IsNullOrEmpty(dto.Email))
                 return (false, "Invalid employee data.");
+            if(await _userManager.FindByEmailAsync(dto.Email) != null)
+                return (false, "Email already exists.");
+
             var random = new Random();
             var randomNumber = random.Next(00,99);
             var newUser = new ApplicationUser
@@ -47,7 +50,7 @@ namespace ShippingManagementSystem.Domain.Services
                 PhoneNumber = dto.PhoneNumber,
                 IsDeleted = false,
                 HiringDate = DateTime.Now,
-                Address = "Cairo"
+                Address = dto.Address,
             };
 
             using (var transaction = await _unit.BeginTransactionAsync())
@@ -57,14 +60,14 @@ namespace ShippingManagementSystem.Domain.Services
                     var result = await _userManager.CreateAsync(newUser, dto.Password);
                     if (!result.Succeeded)
                     {
-                        _unit.RollbackAsync();
+                        await _unit.RollbackAsync();
                         var errors = string.Join("; ", result.Errors.Select(e => e.Description));
                         return (false, $"Create failed: {errors}");
                     }
                     await _userManager.AddToRoleAsync(newUser, Roles.Employee);
                     if (dto.GroupId == null)
                     {
-                        _unit.RollbackAsync();
+                        await _unit.RollbackAsync();
                         return (false, "Group is required.");
                     }
 
@@ -77,7 +80,7 @@ namespace ShippingManagementSystem.Domain.Services
 
                     if (dto.BranchIds == null || !dto.BranchIds.Any())
                     {
-                        _unit.RollbackAsync();
+                        await _unit.RollbackAsync();
                         return (false, "Branches are required.");
                     }
 
@@ -92,7 +95,12 @@ namespace ShippingManagementSystem.Domain.Services
                     }
 
                     var GroupMedule = _context.GroupMedules.Where(gm => gm.GroupId == dto.GroupId).ToList();
-                    
+                    if (GroupMedule == null || !GroupMedule.Any())
+                    {
+                        await _unit.RollbackAsync();
+                        return (false, "No permissions found for the selected group.");
+                    }
+
                     var UserClaims = new List<Claim>();
                     foreach (var gm in GroupMedule)
                     {
@@ -103,7 +111,7 @@ namespace ShippingManagementSystem.Domain.Services
 
                     if (!addClaimResult.Succeeded)
                     {
-                        _unit.RollbackAsync();
+                        await _unit.RollbackAsync();
                         var errors = string.Join(", ", addClaimResult.Errors.Select(e => e.Description));
                         return (false, $"Add claims failed: {errors}");
                     }
@@ -126,38 +134,9 @@ namespace ShippingManagementSystem.Domain.Services
 
         #region Get All 
 
-        //        public async Task<IReadOnlyList<PaginationResponse<EmployeeDTO>>> GetAllEmployeesAsync(EmployeeParams param)
-//        {
-//            var spec = new EmployeeSpecification(param);
-//            var employees = await _unit.Repository<Employee>().GetAllBySpecAsync(spec);
-
-//            var result = employees.Select(emp => new EmployeeDTO
-//            {
-//                Id = emp.UserID,
-//                Name = emp.User?.Name ?? string.Empty,
-//                Email = emp.User?.Email ?? string.Empty,
-//                PhoneNumber = emp.User?.PhoneNumber ?? string.Empty,
-//                CreationDate = emp.User?.HiringDate.ToString("yyyy-MM-dd") ?? DateTime.UtcNow.ToString("yyyy-MM-dd"),
-//                Branches = emp.User?.UserBranches?
-//        .Select(ub => new BranchDTO
-//        {
-//            Id = ub.BranchId,
-//            Name = ub.Branch?.Name ?? string.Empty,
-//            CreationDate = ub.Branch?.CreationDate.ToString("yyyy-MM-dd") ?? DateTime.UtcNow.ToString("yyyy-MM-dd"),
-//            IsDeleted = ub.Branch?.IsDeleted ?? false
-//        })
-//        .ToList() ?? new List<BranchDTO>(),
-//                //Permission = 
-//                IsDeleted = emp.User?.IsDeleted ?? false
-//            }).ToList();
-
-//            return new
-//}
-
         public async Task<PaginationResponse<EmployeeDTO>> GetAllEmployeesAsync(EmployeeParams param)
         {
             var spec = new EmployeeSpecification(param);
-
             var employees = await _unit.Repository<Employee>().GetAllBySpecAsync(spec);
 
             var totalCount = await _unit.Repository<Employee>().CountAsync(spec);
@@ -175,11 +154,14 @@ namespace ShippingManagementSystem.Domain.Services
                         Id = ub.BranchId,
                         Name = ub.Branch?.Name ?? string.Empty,
                         CreationDate = ub.Branch?.CreationDate.ToString("yyyy-MM-dd") ?? DateTime.UtcNow.ToString("yyyy-MM-dd"),
-                        IsDeleted = ub.Branch?.IsDeleted ?? false
+                        IsDeleted = ub.Branch?.IsDeleted ?? false,
+                        CityName = ub.Branch.City?.Name,
+                        Location = ub.Branch?.Location
                     })
                     .ToList() ?? new List<GetBranchDTO>(),
                 Permission = emp.Group.Name ?? string.Empty, // فعّلي لو فيه حقل Permission
-                IsDeleted = emp.User?.IsDeleted ?? false
+                IsDeleted = emp.User?.IsDeleted ?? false,
+                Address = emp.User?.Address ?? string.Empty
             }).ToList();
 
             return new PaginationResponse<EmployeeDTO>(
@@ -226,7 +208,8 @@ namespace ShippingManagementSystem.Domain.Services
                     })
                     .ToList() ?? new List<GetBranchDTO>(),
                 Permission = employee.Group.Name ?? string.Empty,
-                IsDeleted = user.IsDeleted
+                IsDeleted = user.IsDeleted,
+                Address = user.Address ?? string.Empty
             };
         }
 
@@ -250,11 +233,14 @@ namespace ShippingManagementSystem.Domain.Services
                 var employee = await _unit.Repository<Employee>().GetBySpecAsync(spec);
                 if (employee == null)
                     throw new InvalidOperationException("Employee not found.");
-
-                user.Name = dto.Name ?? user.Name;
-                user.Email = dto.Email ?? user.Email;
-                user.PhoneNumber = dto.PhoneNumber ?? user.PhoneNumber;
-                user.Address = dto.Address ?? user.Address;
+                if(!string.IsNullOrEmpty(dto.Name))
+                    user.Name = dto.Name;
+                if (!string.IsNullOrEmpty(dto.Email))
+                    user.Email = dto.Email;
+                if (!string.IsNullOrEmpty(dto.PhoneNumber))
+                    user.PhoneNumber = dto.PhoneNumber;
+                if (!string.IsNullOrEmpty(dto.Address))
+                    user.Address = dto.Address;
 
                 var updateResult = await _userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
@@ -288,18 +274,16 @@ namespace ShippingManagementSystem.Domain.Services
                     _unit.Repository<Employee>().Update(employee);
                 }
 
-                if (dto.BranchId != null && dto.BranchId.Any())
+                if (dto.BranchIds != null && dto.BranchIds.Any())
                 {
                     var existingBranches = _unit.Repository<UserBranches>()
                         .GetAll().Result
                         .Where(ub => ub.UserId == dto.Id)
                         .ToList();
-                    foreach (var branch in existingBranches)
-                    {
-                        _unit.Repository<UserBranches>().Delete(branch.BranchId);
-                    }
+                    
+                    await _unit.Repository<UserBranches>().DeleteRange(existingBranches);
 
-                    foreach (var branchId in dto.BranchId)
+                    foreach (var branchId in dto.BranchIds)
                     {
                         var userBranch = new UserBranches
                         {

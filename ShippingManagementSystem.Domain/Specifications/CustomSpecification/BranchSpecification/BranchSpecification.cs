@@ -24,11 +24,11 @@ namespace ShippingManagementSystem.Domain.Specifications.BranchSpecification
                     case "name_desc":
                         ApplyOrderByDescending(x => x.Name);
                         break;
-                    case "date_asc":
-                        ApplyOrderBy(x => x.CreationDate);
+                    case "id_asc":
+                        ApplyOrderBy(x => x.Id);
                         break;
-                    case "date_desc":
-                        ApplyOrderByDescending(x => x.CreationDate);
+                    case "id_desc":
+                        ApplyOrderByDescending(x => x.Id);
                         break;
                     default:
                         ApplyOrderBy(x => x.Id);

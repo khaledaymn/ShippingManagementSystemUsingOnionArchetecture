@@ -17,5 +17,6 @@ namespace ShippingManagementSystem.Domain.DTOs.EmployeeDTOs
         public List<GetBranchDTO> Branches { get; set; }
         public string Permission { get; set; }
         public bool IsDeleted { get; set; }
+        public string Address { get; set; }
     }
 }

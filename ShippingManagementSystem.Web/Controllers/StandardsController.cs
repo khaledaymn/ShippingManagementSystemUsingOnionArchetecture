@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ShippingManagementSystem.Application.Helpers;
+using ShippingManagementSystem.Application.Helper;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.StandardDTOs;
 using ShippingManagementSystem.Domain.Interfaces;
@@ -11,7 +11,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class StandardsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -23,7 +23,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/Standard/Update/{id}")]
-        //[Authorize(Policy = Settings.Edit)]
+        [Authorize(Policy =
+            $"Permission={Settings.Edit};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<IActionResult> UpdateStandard(int id, [FromBody] UpdateStandardDTO standardDTO)
         {
             if (!ModelState.IsValid)
@@ -39,7 +42,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/Standard/GetSetting")]
-        //[Authorize(Policy = Settings.View)]
+        [Authorize(Policy =
+            $"Permission={Settings.View};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin},{Roles.Merchant},{Roles.ShippingRepresentative}")]
         public async Task<IActionResult> GetSetting()
         {
             var standards = await _unitOfWork.standardServices.GetSettingAsync();

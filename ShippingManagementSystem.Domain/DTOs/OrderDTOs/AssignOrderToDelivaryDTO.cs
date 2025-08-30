@@ -12,6 +12,6 @@ namespace ShippingManagementSystem.Domain.DTOs.OrderDTOs
         [Required(ErrorMessage = "Order status is required")]
         public string OrderState { get; set; } = string.Empty;
         [Required(ErrorMessage = "ShippigRepresentativeId is required")]
-        public string ShippigRepresentativeId { get; set; }
+        public string ShippingRepresentativeId { get; set; }
     }
 }

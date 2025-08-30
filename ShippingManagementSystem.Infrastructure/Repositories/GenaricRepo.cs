@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using ShippingManagementSystem.Domain.Interfaces;
 using ShippingManagementSystem.Domain.Interfaces.IGenaricRepository;
 using ShippingManagementSystem.Infrastructure.Data;
@@ -21,10 +22,14 @@ namespace ShippingManagementSystem.Infrastructure.Repositories
             await _context.Set<T>().AddAsync(obj);
         }
 
-        public async void Delete(int id)
+        public async Task Delete<T2>(T2 id)
         {
             T obj = await GetById(id);
             _context.Set<T>().Remove(obj);
+        }
+        public EntityEntry<T> DeleteEntity(T item)
+        {
+            return _context.Set<T>().Remove(item);
         }
 
         public Task<List<T>> GetAll()
@@ -50,7 +55,6 @@ namespace ShippingManagementSystem.Infrastructure.Repositories
         public async Task DeleteRange(IEnumerable<T> objs)
         {
             _context.Set<T>().RemoveRange(objs);
-           
         }
 
         public async Task<List<T>> Find(Expression<Func<T, bool>> predicate)
@@ -81,7 +85,9 @@ namespace ShippingManagementSystem.Infrastructure.Repositories
         public async Task<int> CountAsync(ISpecification<T> spec)
         {
             ArgumentNullException.ThrowIfNull(spec);
-            return await ApplySpecification(spec).CountAsync();
+            var query = _context.Set<T>().AsQueryable();
+
+            return await query.CountAsync(spec?.Criteria);
         }
 
         private IQueryable<T> ApplySpecification(ISpecification<T> spec)
@@ -109,6 +115,8 @@ namespace ShippingManagementSystem.Infrastructure.Repositories
 
             return query;
         }
+
+        
 
         #endregion
     }

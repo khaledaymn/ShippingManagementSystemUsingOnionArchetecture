@@ -17,5 +17,6 @@ namespace ShippingManagementSystem.Domain.Interfaces
         Task<(bool IsSuccess, string Message)> UpdateOrderStatusAsync(int id, UpdateOrderStatusDTO statusDTO);
         Task<(bool IsSuccess, string Message)> DeleteOrderAsync(int id);
         Task<(bool IsSuccess, string Message)> AssignOrderToDelivaryAsync(int id, AssignOrderToDelivaryDTO statusDTO);
+        Task<(bool IsSuccess, string Message)> CreateOrdersAsync(IEnumerable<CreateOrderDTO> orderDTOs);
     }
 } 

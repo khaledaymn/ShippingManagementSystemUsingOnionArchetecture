@@ -10,9 +10,11 @@ namespace ShippingManagementSystem.Domain.DTOs.ShippingRepresentativeDTOs
         public string Name { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
+        public string Address { get; set; }
         public DiscountType DiscountType { get; set; }
         public double CompanyPercentage { get; set; }
         public DateTime HiringDate { get; set; }
         public List<string> Governorates { get; set; } = new List<string>();
+        public bool IsDeleted { get; set; }
     }
 }

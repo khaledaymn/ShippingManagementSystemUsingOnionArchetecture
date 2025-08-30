@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShippingManagementSystem.Application.Exptions;
-using ShippingManagementSystem.Application.Helpers;
+using ShippingManagementSystem.Application.Helper;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs;
 using ShippingManagementSystem.Domain.DTOs.ShippingRepresentativeDTOs;
@@ -14,7 +14,7 @@ namespace ShippingManagementSystem.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] 
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] 
     public class ShippingRepresentativesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -28,7 +28,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/ShippingRepresentatives/GetAll")]
-        //[Authorize(Policy = ShippingRepresentatives.View)]
+        [Authorize(Policy =
+            $"Permission={ShippingRepresentatives.View};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<ActionResult<PaginationResponse<ShippingRepresentativeDTO>>> GetAll([FromQuery] ShippingRepresentativeParams param)
         {
             try
@@ -49,6 +52,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpGet]
         [Route("~/ShippingRepresentatives/GetById/{id}")]
+        [Authorize(Policy =
+            $"Permission={ShippingRepresentatives.View};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<ActionResult<ShippingRepresentativeDTO>> GetById(string id)
         {
             try
@@ -72,7 +79,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPost]
         [Route("~/ShippingRepresentatives/Add")]
-        //[Authorize(Policy = ShippingRepresentatives.Create)]
+        [Authorize(Policy =
+            $"Permission={ShippingRepresentatives.Create};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<ActionResult> Add(AddShippingRepresentativeDTO dto)
         {
             try
@@ -99,7 +109,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpPut]
         [Route("~/ShippingRepresentatives/Update")]
-        //[Authorize(Policy = ShippingRepresentatives.Edit)]
+        [Authorize(Policy =
+            $"Permission={ShippingRepresentatives.Edit};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<ActionResult> Update(UpdateShippingRepresentativeDTO dto)
         {
             try
@@ -126,7 +139,10 @@ namespace ShippingManagementSystem.Web.Controllers
 
         [HttpDelete]
         [Route("~/ShippingRepresentatives/Delete/{id}")]
-        //[Authorize(Policy = ShippingRepresentatives.Delete)]
+        [Authorize(Policy =
+            $"Permission={ShippingRepresentatives.Delete};" +
+            $"RequiredRole={Roles.Employee};" +
+            $"AllowedRole={Roles.Admin}")]
         public async Task<ActionResult> Delete(string id)
         {
             try

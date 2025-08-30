@@ -1,5 +1,6 @@
 
 
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq.Expressions;
 
 namespace ShippingManagementSystem.Domain.Interfaces.IGenaricRepository
@@ -9,7 +10,8 @@ namespace ShippingManagementSystem.Domain.Interfaces.IGenaricRepository
         public Task<List<T>> GetAll();
         public Task<T> GetById<T2>(T2 id);
         public Task Add(T obj);
-        public void Delete(int id);
+        Task Delete<T2>(T2 id);
+        EntityEntry<T> DeleteEntity(T item);
         public void Update(T obj);
         Task AddRange(IEnumerable<T> entities);
         Task DeleteRange(IEnumerable<T> entities);

@@ -177,5 +177,29 @@ namespace ShippingManagementSystem.Application.Services
 
         #endregion
 
+        public async Task<(bool IsSuccess, string Message)> Delete(int id)
+        {
+            try
+            {
+                var branch = await _unitOfWork.Repository<Branch>().GetById(id);
+                
+                if (branch == null)
+                    return (false, $"Branch with id {id} not found");
+                
+                // Hard delete if needed
+                await _unitOfWork.Repository<Branch>().Delete(branch.Id);
+                
+                await _unitOfWork.Save();
+                
+                return (true, $"Branch '{branch.Name}' deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error deleting branch: {ex.Message}");
+            }
+        }
+
+        
+
     }
 } 

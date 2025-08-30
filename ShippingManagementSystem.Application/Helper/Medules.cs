@@ -1,4 +1,4 @@
-﻿namespace ShippingManagementSystem.Application.Helpers
+﻿namespace ShippingManagementSystem.Application.Helper
 {
     public static class Medules
     {
@@ -103,5 +103,4 @@
             public const string Edit = "Permission.Settings.Edit";
             public const string Delete = "Permission.Settings.Delete";
         }
-    
 }

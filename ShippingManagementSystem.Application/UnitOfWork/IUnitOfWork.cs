@@ -12,6 +12,7 @@ namespace ShippingManagementSystem.Application.UnitOfWork
 {
     public interface IUnitOfWork
     {
+        IDashboardService DashboardService { get; }
         IBranchServices BranchService { get; }
         IChargeTypeServices ChargeTypeService { get; }
         ICityServices CityService { get; }

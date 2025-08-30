@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ShippingManagementSystem.Application.Helpers;
+using ShippingManagementSystem.Application.Helper;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs;
 using ShippingManagementSystem.Domain.DTOs.GroupDTOs;
@@ -63,21 +63,33 @@ namespace ShippingManagementSystem.Application.Services
             }
         }
 
-        public async Task<GroupDTO?> GetGroupByIdAsync(int id)
+        public async Task<GroupPermissionsDTO?> GetGroupByIdAsync(int id)
         {
             try
             {
                 var spec = new GroupSpecification(id);
                 var group = await _unitOfWork.Repository<Group>().GetBySpecAsync(spec);
-                
+
                 if (group == null)
                     return null;
-                                
-                return new GroupDTO
+
+                var groupMedules = _unitOfWork.Repository<GroupMedule>()
+                    .GetAll().Result.Where(gm => gm.GroupId == id);
+
+                // Map permissions to Dictionary<string, List<string>>
+                var permissions = groupMedules
+                    .GroupBy(gm => gm.Medule?.Name ?? $"Module_{gm.MeduleId}")
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Select(gm => (int)gm.Permission).ToList()
+                    );
+
+                return new GroupPermissionsDTO
                 {
                     Id = group.Id,
-                    Name = group.Name,
-                    CreationDate = group.CreationDate.ToString("yyyy-MM-dd HH:mm"),
+                    Name = group.Name ?? string.Empty,
+                    Date = group.CreationDate.ToString("dd/MM/yyyy"), // ISO 8601 format (e.g., "2025-07-09T18:05:00Z")
+                    Permissions = permissions
                 };
             }
             catch (Exception ex)
@@ -136,10 +148,13 @@ namespace ShippingManagementSystem.Application.Services
         {
             try
             {
+                if (groupDTO == null)
+                    return (false, "Group data cannot be null");
+
                 using var transaction = await _unitOfWork.BeginTransactionAsync();
 
                 var group = await _unitOfWork.Repository<Group>().GetById(id);
-                
+                var result = 0;
                 if (group == null)
                 {
                     await _unitOfWork.RollbackAsync();
@@ -150,6 +165,7 @@ namespace ShippingManagementSystem.Application.Services
                     // Clear existing permissions
                     var existingPermissions = await _unitOfWork.Repository<GroupMedule>().GetAll();
                     await _unitOfWork.Repository<GroupMedule>().DeleteRange(existingPermissions.Where(g => g.GroupId == groupDTO.Id));
+                    result = await _unitOfWork.Save();
 
                     var Id = group.Id;
 
@@ -176,8 +192,14 @@ namespace ShippingManagementSystem.Application.Services
                 }
                 
                 _unitOfWork.Repository<Group>().Update(group);
-                await _unitOfWork.Save();
-                
+                result += await _unitOfWork.Save();
+
+                if (result <= 0)
+                {
+                    await _unitOfWork.RollbackAsync();
+                    return (false, "Failed to update group");
+                }
+                await _unitOfWork.CommitAsync();
                 return (true, $"Group '{group.Name}' updated successfully");
             }
             catch (Exception ex)
@@ -194,14 +216,21 @@ namespace ShippingManagementSystem.Application.Services
                 
                 if (group == null)
                     return (false, $"Group with id {id} not found");
-                
+                if(group.User != null && group.User.Any())
+                {
+                    return (false, $"Group '{group.Name}' cannot be deleted because it has associated users.");
+                }
+
                 // Check if group has related GroupMedules
                 if (group.GroupMedules != null && group.GroupMedules.Any())
                 {
-                    return (false, "Cannot delete group as it has associated modules. Please remove the modules first.");
+                    // Delete related GroupMedules
+                    await _unitOfWork.Repository<GroupMedule>().DeleteRange(group.GroupMedules);
+                    await _unitOfWork.Save();
                 }
                
-                _unitOfWork.Repository<Group>().Delete(group.Id);
+
+                await _unitOfWork.Repository<Group>().Delete(group.Id);
                 await _unitOfWork.Save();
                 
                 return (true, $"Group '{group.Name}' deleted successfully");

@@ -27,6 +27,12 @@ namespace ShippingManagementSystem.Domain.Specifications.CitySpecification
                     case "name_desc":
                         ApplyOrderByDescending(x => x.Name);
                         break;
+                    case "id_asc":
+                        ApplyOrderBy(x => x.Id);
+                        break;
+                    case "id_desc":
+                        ApplyOrderByDescending(x => x.Id);
+                        break;
                     case "charge_asc":
                         ApplyOrderBy(x => x.ChargePrice);
                         break;

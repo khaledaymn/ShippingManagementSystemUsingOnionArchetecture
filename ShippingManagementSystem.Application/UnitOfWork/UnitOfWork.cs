@@ -51,6 +51,7 @@ namespace ShippingManagementSystem.Application.UnitOfWork
         private IRejectedReasonServices _rejectedReasonService;
         private IOrderServices _orderService;
         private IStandardServices _standersServices;
+        private IDashboardService _dashboardService;
 
         #endregion
 
@@ -247,6 +248,19 @@ namespace ShippingManagementSystem.Application.UnitOfWork
             }
         }
 
+        #endregion
+
+        #region Dashboard Service
+
+        public IDashboardService DashboardService
+        {
+            get
+            {
+                if (_dashboardService != null)
+                    return _dashboardService;
+                return new DashboardService(_context);
+            }
+        }
         #endregion
 
         #endregion

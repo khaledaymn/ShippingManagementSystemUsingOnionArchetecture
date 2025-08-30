@@ -104,14 +104,15 @@ namespace ShippingManagementSystem.Application.Services
                 return (false, $"Error creating city: {ex.Message}");
             }
         }
-        public async Task<(bool IsSuccess, EditCityDTO)> EditCityAsync(EditCityDTO cityDTO)
+        public async Task<(bool IsSuccess, string Message)> EditCityAsync(EditCityDTO cityDTO)
         {
             try
             {
                 var city = await _unitOfWork.Repository<City>().GetById(cityDTO.Id);
 
                 if (city == null)
-                    return (false, null);
+                    return (false, $"City not found");
+
 
                 // Only update properties that are provided
                 if (!string.IsNullOrEmpty(cityDTO.Name))
@@ -119,21 +120,21 @@ namespace ShippingManagementSystem.Application.Services
                     city.Name = cityDTO.Name;
                 }
 
-                if (cityDTO.ChargePrice!=null&&cityDTO.ChargePrice > 0)
+                if (cityDTO.ChargePrice.HasValue)
                 {
                     city.ChargePrice = cityDTO.ChargePrice??0;
                 }
 
-                if (cityDTO.PickUpPrice!=null&&cityDTO.PickUpPrice > 0)
+                if (cityDTO.PickUpPrice.HasValue)
                 {
                     city.PickUpPrice = cityDTO.PickUpPrice??0;
                 }
 
-                if (cityDTO.GovernorateId!=null &&cityDTO.GovernorateId > 0 && cityDTO.GovernorateId != city.GovernorateId)
+                if (cityDTO.GovernorateId.HasValue && cityDTO.GovernorateId > 0 && cityDTO.GovernorateId != city.GovernorateId)
                 {
                     var governorate = await _unitOfWork.Repository<Governorate>().GetById(cityDTO.GovernorateId);
                     if (governorate == null)
-                        return (false, null);
+                        return (false, $"Governorate not found");
 
                     city.GovernorateId = cityDTO.GovernorateId ?? 0;
                 }
@@ -141,12 +142,11 @@ namespace ShippingManagementSystem.Application.Services
                 _unitOfWork.Repository<City>().Update(city);
                 await _unitOfWork.Save();
 
-                return (true, cityDTO);
+                return (true, $"City '{city.Name}' updated successfully");
             }
             catch (Exception ex)
             {
-                // Consider logging the exception here
-                return (false, null);
+                return (false, $"Error updating city: {ex.Message}");
             }
         }
         public async Task<(bool IsSuccess, string Message)> DeleteCityAsync(int id)

@@ -1,4 +1,4 @@
-﻿namespace Shipping_Project.DTOs.MerchantDtos
+﻿namespace ShippingManagementSystem.Domain.DTOs.MerchantDtos
 {
     public class GovernoratePaginationForCount<T> 
     {

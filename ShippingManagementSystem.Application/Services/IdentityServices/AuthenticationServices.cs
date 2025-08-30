@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ShippingManagementSystem.Application.DTOs.AuthenticationDTOs;
-using ShippingManagementSystem.Application.Helpers;
+using ShippingManagementSystem.Application.Helper;
 using ShippingManagementSystem.Application.Settings;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.AuthenticationDTOs;
@@ -17,6 +17,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace ShippingManagementSystem.Application.Services.IdentityServices
 {
@@ -26,7 +27,7 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
         private readonly JWT _jwt;
         private readonly IUnitOfWork _unitOfWork;
         private readonly AdminLogin _adminLogin;
-        public AuthenticationServices(UserManager<ApplicationUser> userManager, 
+        public AuthenticationServices(UserManager<ApplicationUser> userManager,
             IOptions<JWT> jwt, IUnitOfWork unitOfWork, IOptions<AdminLogin> adminLogin)
         {
             _userManager = userManager;
@@ -34,7 +35,7 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
             _unitOfWork = unitOfWork;
             _adminLogin = adminLogin.Value;
         }
-        
+
         private async Task<ApplicationUser> AdminLogin()
         {
             var admin = new ApplicationUser
@@ -62,8 +63,8 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
                 };
             var user = await _userManager.FindByEmailAsync(data.Email);
             if (user == null && data.Email == _adminLogin.Email && data.Password == _adminLogin.Password)
-               await AdminLogin();
-            if(user == null)
+                await AdminLogin();
+            if (user == null)
                 user = await _userManager.FindByNameAsync(data.Email);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, data.Password))
@@ -108,6 +109,8 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
                 result.Message = "Login successfully";
                 result.IsAuthenticated = true;
                 result.Id = user.Id;
+                result.Name = user.Name;
+                result.Email = user?.Email;
                 return result;
             }
             catch (Exception ex)
@@ -136,7 +139,7 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
             try
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
+                token = HttpUtility.UrlEncode(token);
                 var message = await _unitOfWork.EmailService.SendEmailAsync(user.Name, user.Email, token);
 
                 return message;
@@ -166,6 +169,7 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
 
             try
             {
+                //var token = HttpUtility.UrlDecode(dto.Token);
                 var resetResult = await _userManager.ResetPasswordAsync(user, dto.Token, dto.Password);
                 if (!resetResult.Succeeded)
                 {
@@ -190,7 +194,7 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
             if (dto == null || string.IsNullOrEmpty(dto.UserId) || string.IsNullOrEmpty(dto.OldPassword) || string.IsNullOrEmpty(dto.NewPassword))
                 return "User ID, old password, and new password are required.";
 
-           
+
             // Ensure new password is not the same as the old password
             if (dto.OldPassword == dto.NewPassword)
                 return "New password cannot be the same as the old password.";
@@ -271,27 +275,26 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
 
 
         #region Get User By Id
-        public async Task<SpecificUserDataDTo> GetSpecificUser(string id)
+        public async Task<SpecificUserDataDTO> GetSpecificUser(string id)
         {
             if (id == null || string.IsNullOrEmpty(id))
                 return null;
 
 
-
             var user = await _userManager.FindByIdAsync(id);
-
             if (user == null)
                 return null;
 
-            return new SpecificUserDataDTo
+            return new SpecificUserDataDTO
             {
-                id = user.Id,
-                DisplayName = user.Name,
+                Id = user.Id,
+                Name = user.Name,
                 UserName = user.UserName,
                 Address = user.Address,
-                email = user.Email,
-                PhoneNumber = user.PhoneNumber
-
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                HireDate = user.HiringDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault()
             };
         }
 
@@ -299,45 +302,40 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
 
 
         #region UpdateUserData
-        public async Task<(bool IsSuccess, string Message)> UpdateUserData(SpecificUserDataDTo dto)
+        public async Task<(bool IsSuccess, string Message)> UpdateUserData(SpecificUserDataDTO dto)
         {
-            if (dto == null || string.IsNullOrEmpty(dto.id))
+            if (dto == null || string.IsNullOrEmpty(dto.Id))
                 return (false, "Invalid user data.");
-            var user = await _userManager.FindByIdAsync(dto.id);
+            var user = await _userManager.FindByIdAsync(dto.Id);
             if (user == null)
                 return (false, "User not found.");
 
-
-
-
-
-            using (var transaction = await _unitOfWork.BeginTransactionAsync())
+            try
             {
-                try
+                if (!string.IsNullOrEmpty(dto.Name))
+                    user.Name = dto.Name;
+                if (!string.IsNullOrEmpty(dto.UserName))
+                    user.UserName = dto.UserName;
+                if (!string.IsNullOrEmpty(dto.Address))
+                    user.Address = dto.Address;
+                if (!string.IsNullOrEmpty(dto.Email))
+                    user.Email = dto.Email;
+                if (!string.IsNullOrEmpty(dto.PhoneNumber))
+                    user.PhoneNumber = dto.PhoneNumber;
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
                 {
-                    if (!string.IsNullOrEmpty(dto.DisplayName))
-                        user.Name = dto.DisplayName;
-                    if (!string.IsNullOrEmpty(dto.UserName))
-                        user.UserName = dto.UserName;
-                    if (!string.IsNullOrEmpty(dto.Address))
-                        user.Address = dto.Address;
-                    if (!string.IsNullOrEmpty(dto.email))
-                        user.Email = dto.email;
-                    if (!string.IsNullOrEmpty(dto.PhoneNumber))
-                        user.UserName = dto.PhoneNumber;
-                    var result = await _userManager.UpdateAsync(user);
-
-
-
-                    await transaction.CommitAsync();
-
-                    return (true, "user updated successfully.");
+                    var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                    return (false, $"Failed to update user: {errors}");
                 }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    return (false, $"An error occurred: {ex.Message}");
-                }
+                await _unitOfWork.Save();
+                return (true, "user updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"An error occurred: {ex.Message}");
             }
         }
 

@@ -26,7 +26,8 @@ namespace ShippingManagementSystem.Domain.DTOs.ShippingRepresentativeDTOs
         [Required]
         [Range(0, 100)]
         public double CompanyPercentage { get; set; }
-        
+        [Required]
+        public string Address { get; set; }
         public List<int> GovernorateIds { get; set; } = new List<int>();
     }
 }

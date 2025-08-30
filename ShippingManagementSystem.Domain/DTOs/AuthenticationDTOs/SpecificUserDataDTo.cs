@@ -7,22 +7,16 @@ using System.Threading.Tasks;
 
 namespace ShippingManagementSystem.Domain.DTOs.AuthenticationDTOs
 {
-    public class SpecificUserDataDTo
+    public class SpecificUserDataDTO
     {
-        [Required]
-        public string id { get; set; }
-        [Required]
-        public string DisplayName { get; set; }
-        [Required]
-        public string UserName { get; set; }
-
+        public string Id { get; set; }
+        public string? Name { get; set; }
+        public string? UserName { get; set; }
         public string? Address { get; set; }
-        [EmailAddress]
-        public string email { get; set; }
-        [Phone]
-        [RegularExpression(@"^\+?[1-9]\d{1,14}$", ErrorMessage = "Enter a valid international phone number.")]
-
+        public string? Email { get; set; }
+        public string? HireDate { get; set; }
         public string? PhoneNumber { get; set; }
+        public string? Role { get; set; }
     }
 
 }

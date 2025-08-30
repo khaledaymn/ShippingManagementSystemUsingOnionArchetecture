@@ -9,7 +9,6 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Emp
     public class EmployeeParams
     {
         public string? Search { get; set; }
-        public string? Branch { get; set; }
         public bool? IsActive { get; set; }
         public string? Sort { get; set; }
         public int PageIndex { get; set; } = 1;

@@ -81,7 +81,7 @@ namespace ShippingManagementSystem.Application.Services
                     IsDeleted = false
                 };
                 
-                _unitOfWork.Repository<Governorate>().Add(governorate);
+                await _unitOfWork.Repository<Governorate>().Add(governorate);
                 await _unitOfWork.Save();
                 
                 return (true, $"Governorate '{governorate.Name}' created successfully");

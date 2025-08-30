@@ -28,7 +28,7 @@ namespace ShippingManagementSystem.Domain.DTOs.OrderDTOs
         public string? ChargeTypeName { get; set; }
         public string? BranchName { get; set; }
         public string? MerchantName { get; set; }
-        public string? ShippigRepresentativeName { get; set; }
+        public string? ShippingRepresentativeName { get; set; }
         
         public List<ProductDTO>? Products { get; set; }
     }

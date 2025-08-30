@@ -1,65 +1,77 @@
 using ShippingManagementSystem.Domain.Entities;
-using ShippingManagementSystem.Domain.Enums;
 using ShippingManagementSystem.Domain.Specifications;
 using System;
-using System.Linq;
+using System.Linq.Expressions;
 
 namespace ShippingManagementSystem.Domain.Specifications.OrderSpecification
 {
     public class OrderSpecification : BaseSpecification<Order>
     {
-        public OrderSpecification(OrderParams param) : base(x =>
-            // Search by customer name or phone
-            (string.IsNullOrEmpty(param.Search) || 
-                x.CustomerName.ToLower().Contains(param.Search.ToLower()) || 
-                x.CustomerPhone1.Contains(param.Search) || 
-                (x.CustomerPhone2 != null && x.CustomerPhone2.Contains(param.Search))) &&
-            // Filter by order state
-            (string.IsNullOrEmpty(param.OrderState) || 
-                x.OrderState.ToString() == param.OrderState) &&
-            // Filter by city
-            (!param.CityId.HasValue || x.CityId == param.CityId) &&
-            // Filter by branch
-            (!param.BranchId.HasValue || x.BranchId == param.BranchId) &&
-            // Filter by merchant
-            (string.IsNullOrEmpty(param.MerchantId) || x.MerchantId == param.MerchantId) &&
-            // Filter by shipping representative
-            (string.IsNullOrEmpty(param.ShippigRepresentativeId) || x.ShippigRepresentativeId == param.ShippigRepresentativeId) &&
-            // Filter by date range
-            (!param.FromDate.HasValue || x.CreationDate >= param.FromDate) &&
-            (!param.ToDate.HasValue || x.CreationDate <= param.ToDate) &&
-            // Filter by order type
-            (string.IsNullOrEmpty(param.OrderType) || x.OrderType.ToString() == param.OrderType) &&
-            // Filter by payment type
-            (string.IsNullOrEmpty(param.PaymentType) || x.PaymentType.ToString() == param.PaymentType) &&
-            // Filter by deleted status
-            (!param.IsDeleted.HasValue || x.IsDeleted == param.IsDeleted))
+        public OrderSpecification(OrderParams param)
         {
-            // Include related entities
-            // We'll fetch these separately as needed
-            
+            // Define the filtering criteria
+            Criteria = x =>
+                (string.IsNullOrEmpty(param.Search) ||
+                    x.CustomerName.ToLower().Contains(param.Search.ToLower()) ||
+                    x.CustomerPhone1.Contains(param.Search) ||
+                    (x.CustomerPhone2 != null && x.CustomerPhone2.Contains(param.Search))) &&
+                (string.IsNullOrEmpty(param.OrderState) || x.OrderState.ToString() == param.OrderState) &&
+                (!param.CityId.HasValue || x.CityId == param.CityId) &&
+                (!param.BranchId.HasValue || x.BranchId == param.BranchId) &&
+                (string.IsNullOrEmpty(param.MerchantId) || x.MerchantId == param.MerchantId) &&
+                (string.IsNullOrEmpty(param.ShippingRepresentativeId) || x.ShippingRepresentativeId == param.ShippingRepresentativeId) &&
+                (!param.FromDate.HasValue || x.CreationDate >= param.FromDate) &&
+                (!param.ToDate.HasValue || x.CreationDate <= param.ToDate) &&
+                (string.IsNullOrEmpty(param.OrderType) || x.OrderType.ToString() == param.OrderType) &&
+                (string.IsNullOrEmpty(param.PaymentType) || x.PaymentType.ToString() == param.PaymentType) &&
+                (!param.IsDeleted.HasValue || x.IsDeleted == param.IsDeleted);
+
             // Apply sorting
             if (!string.IsNullOrEmpty(param.Sort))
             {
                 switch (param.Sort.ToLower())
                 {
-                    case "date_asc":
+                    case "date":
                         ApplyOrderBy(x => x.CreationDate);
                         break;
                     case "date_desc":
                         ApplyOrderByDescending(x => x.CreationDate);
                         break;
-                    case "customer_asc":
+                    case "customer":
                         ApplyOrderBy(x => x.CustomerName);
                         break;
                     case "customer_desc":
                         ApplyOrderByDescending(x => x.CustomerName);
                         break;
-                    case "price_asc":
+                    case "price":
                         ApplyOrderBy(x => x.OrderPrice);
                         break;
                     case "price_desc":
                         ApplyOrderByDescending(x => x.OrderPrice);
+                        break;
+                    case "charge":
+                        ApplyOrderBy(x => x.ChargePrice);
+                        break;
+                    case "charge_desc":
+                        ApplyOrderByDescending(x => x.ChargePrice);
+                        break;
+                    case "weight":
+                        ApplyOrderBy(x => x.TotalWeight);
+                        break;
+                    case "weight_desc":
+                        ApplyOrderByDescending(x => x.TotalWeight);
+                        break;
+                    case "amount":
+                        ApplyOrderBy(x => x.AmountReceived);
+                        break;
+                    case "amount_desc":
+                        ApplyOrderByDescending(x => x.AmountReceived);
+                        break;
+                    case "state":
+                        ApplyOrderBy(x => x.OrderState);
+                        break;
+                    case "state_desc":
+                        ApplyOrderByDescending(x => x.OrderState);
                         break;
                     default:
                         ApplyOrderByDescending(x => x.CreationDate);
@@ -68,7 +80,6 @@ namespace ShippingManagementSystem.Domain.Specifications.OrderSpecification
             }
             else
             {
-                // Default sorting by creation date (newest first)
                 ApplyOrderByDescending(x => x.CreationDate);
             }
 
@@ -76,15 +87,18 @@ namespace ShippingManagementSystem.Domain.Specifications.OrderSpecification
             ApplyPagination(param.PageIndex, param.PageSize);
         }
 
-        public OrderSpecification(int id) : base(x => x.Id == id)
+        public OrderSpecification(Expression<Func<Order, bool>> criteria)
+            : base(criteria)
         {
-            // Constructor for getting order by ID
         }
-        
+        public OrderSpecification(int id)
+            : base(x => x.Id == id)
+        {
+        }
         public OrderSpecification(string orderState) : base(x => x.OrderState.ToString() == orderState)
         {
             // Constructor for getting orders by status
             ApplyOrderByDescending(x => x.CreationDate);
         }
     }
-} 
+}

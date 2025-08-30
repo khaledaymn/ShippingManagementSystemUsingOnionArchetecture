@@ -9,7 +9,7 @@ namespace ShippingManagementSystem.Domain.Specifications.OrderSpecification
         public int? CityId { get; set; }
         public int? BranchId { get; set; }
         public string? MerchantId { get; set; }
-        public string? ShippigRepresentativeId { get; set; }
+        public string? ShippingRepresentativeId { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
         public string? OrderType { get; set; }
