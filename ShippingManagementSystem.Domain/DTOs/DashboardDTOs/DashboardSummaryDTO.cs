@@ -42,8 +42,8 @@
             { "ExchangeOrder", 0 }
         };
 
-        // Monthly Performance (for the current year)
-        public Dictionary<int, MonthlyPerformanceData> MonthlyPerformance { get; set; } = new Dictionary<int, MonthlyPerformanceData>();
+        // Monthly Performance (for the current month, representing order state percentages)
+        public Dictionary<string, MonthlyPerformanceData> MonthlyPerformance { get; set; } = new Dictionary<string, MonthlyPerformanceData>();
 
         // Order Status Distribution (for donut chart - simplified total)
         public int OrderStatusDistributionTotal { get; set; } // Total for donut chart (e.g., 570)
@@ -51,8 +51,6 @@
 
     public class MonthlyPerformanceData
     {
-        public int Value { get; set; } // Performance percentage (0-100%)
-        public string Trend { get; set; } // "up", "down", or "neutral"
-        public int Target { get; set; } // Target percentage based on yearly average
+        public decimal Value { get; set; } // Percentage value (0-100%)
     }
 }

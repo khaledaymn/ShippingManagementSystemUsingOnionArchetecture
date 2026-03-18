@@ -7,7 +7,11 @@ using ShippingManagementSystem.Application.Helper;
 using ShippingManagementSystem.Application.Settings;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.AuthenticationDTOs;
+using ShippingManagementSystem.Domain.DTOs.EmployeeDTOs;
+using ShippingManagementSystem.Domain.Entities;
 using ShippingManagementSystem.Domain.Interfaces;
+using ShippingManagementSystem.Domain.Specifications.CustomSpecification.EmployeeSpecification;
+using ShippingManagementSystem.Domain.Specifications.CustomSpecification.ShippingRepresentativeSpecification;
 using ShippingManagementSystem.Domain.UserTypes;
 using System;
 using System.Collections.Generic;
@@ -275,29 +279,94 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
 
 
         #region Get User By Id
-        public async Task<SpecificUserDataDTO> GetSpecificUser(string id)
+        public async Task<object> GetSpecificUser(string role, string id)
         {
             if (id == null || string.IsNullOrEmpty(id))
                 return null;
 
-
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
                 return null;
-
-            return new SpecificUserDataDTO
+            if (role == Roles.Employee)
             {
-                Id = user.Id,
-                Name = user.Name,
-                UserName = user.UserName,
-                Address = user.Address,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                HireDate = user.HiringDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-                Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault()
-            };
-        }
+                var spec = new EmployeeSpecification(p => p.UserID == id);
+                var employee = await _unitOfWork.Repository<Employee>().GetBySpecAsync(spec);
+                var permissions = _unitOfWork.Repository<GroupMedule>()
+                    .GetAll().Result
+                    .Where(gm => gm.GroupId == employee.GroupId)
+                    .GroupBy(gm => gm.Medule?.Name ?? $"Module_{gm.MeduleId}")
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Select(gm => gm.Permission.ToString()).ToList()
+                    );
 
+                return new
+                {
+                    user.Id,
+                    user.Name,
+                    user.Address,
+                    user.Email,
+                    user.PhoneNumber,
+                    HiringDate = user.HiringDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                    Role = employee.Group.Name,
+                    Permissions = permissions
+                };
+            }
+            else if (role == Roles.Merchant)
+            {
+                var spec = new Domain.Specifications.CustomSpecification.MerchantSpecification.MerchantSpecification(id);
+                var merchant = await _unitOfWork.Repository<Merchant>().GetBySpecAsync(spec);
+                return new
+                {
+                    user.Id,
+                    user.Name,
+                    user.Address,
+                    user.Email,
+                    user.PhoneNumber,
+                    HiringDate = user.HiringDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                    Role = Roles.Merchant,
+                    SpecialPrices = merchant.MerchantSpecialPrices.Select(m => new
+                    {
+                        m.SpecialPrice,
+                        m.City.Name
+                    }),
+                    merchant.SpecialPickUp,
+                    merchant.RejectedOrederPercentage,
+                    merchant.StoreName,
+                };
+            }
+            else if (role == Roles.ShippingRepresentative)
+            {
+                var spec = new ShippingRepresentativeSpecification(id);
+                var shippingRep = await _unitOfWork.Repository<ShippigRepresentative>().GetBySpecAsync(spec);
+                return new
+                {
+                    user.Id,
+                    user.Name,
+                    user.Address,
+                    user.Email,
+                    user.PhoneNumber,
+                    HiringDate = user.HiringDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                    Role = Roles.ShippingRepresentative,
+                    CompanyPersentage = shippingRep.DiscountType == UserTypes.Enums.DiscountType.Fixed ? $"${shippingRep.CompanyPersentage}"
+                            : shippingRep.DiscountType == UserTypes.Enums.DiscountType.Persentage ? $"{shippingRep.CompanyPersentage}%" : "",
+                    Governorates = shippingRep.ShippingRepGovernorates.Select(g => g.Governorate.Name),
+                };
+            }
+            else
+                return new SpecificUserDataDTO
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    UserName = user.UserName,
+                    Address = user.Address,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    HireDate = user.HiringDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                    Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault()
+                };
+        }
+  
         #endregion
 
 

@@ -1,16 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ShippingManagementSystem.Application.DTOs.AuthenticationDTOs;
 using ShippingManagementSystem.Application.Helper;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.AuthenticationDTOs;
 using ShippingManagementSystem.Domain.DTOs.EmployeeDTOs;
-using ShippingManagementSystem.Domain.Interfaces;
 using ShippingManagementSystem.Domain.Specifications.CustomSpecification.EmployeeSpecification;
-using System;
-using System.Threading.Tasks;
 
 namespace ShippingManagementSystem.Web.Controllers
 {
@@ -198,15 +194,15 @@ namespace ShippingManagementSystem.Web.Controllers
         #region GetSpecificUserData
 
         [HttpGet]
-        [Route("~/Account/GetSpecificUserData/{id}")]
+        [Route("~/Account/GetSpecificUserData/{role}/{id}")]
         [Authorize(Roles =
             $"{Roles.Admin},{Roles.Merchant}," +
             $"{Roles.ShippingRepresentative},{Roles.Employee}")]
-        public async Task<IActionResult> GetSpecificUserData(string id)
+        public async Task<IActionResult> GetSpecificUserData(string role, string id)
         {
             try
             {
-                var userdata = await _unitOfWork.AuthenticationService.GetSpecificUser(id);
+                var userdata = await _unitOfWork.AuthenticationService.GetSpecificUser(role, id);
                 if (userdata == null)
                 {
                     return NotFound("User not found");

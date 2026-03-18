@@ -14,7 +14,7 @@ namespace ShippingManagementSystem.Domain.Interfaces
         Task<string> ForgetPassword(ForgetPasswordDTO dto);
         Task<string> ResetPassword(ResetPasswordDTO dto);
         Task<string> ChangePassword(ChangePasswordDTO dto);
-        Task<SpecificUserDataDTO> GetSpecificUser(string id);
+        Task<object> GetSpecificUser(string role, string id);
         Task<(bool IsSuccess, string Message)> UpdateUserData(SpecificUserDataDTO dto);
     }
 }

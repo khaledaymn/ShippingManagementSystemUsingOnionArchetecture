@@ -17,8 +17,9 @@ namespace ShippingManagementSystem.Application.Services
 
         public async Task<DashboardSummaryDTO> GetDashboardSummaryAsync(string? userId)
         {
-            // Current date (today: August 18, 2025, 10:12 AM EEST = 07:12 AM UTC)
+            // Current date (today: September 03, 2025, 01:37 AM EEST = 10:37 PM UTC, September 02, 2025)
             var today = DateTime.UtcNow;
+            var currentYear = today.Year;
             var currentMonthStart = new DateTime(today.Year, today.Month, 1); // Start of current month
             var previousMonthStart = currentMonthStart.AddMonths(-1); // Start of previous month
             var previousMonthEnd = currentMonthStart.AddDays(-1); // End of previous month
@@ -32,6 +33,9 @@ namespace ShippingManagementSystem.Application.Services
             {
                 query = query.Where(o => o.MerchantId == userId || o.ShippingRepresentativeId == userId);
             }
+
+            // Get total orders across all time (filtered by userId if provided, excluding deleted orders)
+            var totalOrdersAllTime = await query.CountAsync();
 
             // Aggregate query for current month's data
             var currentData = await query
@@ -120,67 +124,23 @@ namespace ShippingManagementSystem.Application.Services
                 })
                 .FirstOrDefault();
 
-            // Yearly Performance calculation (group by month for the current year)
-            var yearlyPerformanceData = await _dbContext.Orders
-                .Where(o => !o.IsDeleted)
-                .Where(o => string.IsNullOrEmpty(userId) || o.MerchantId == userId || o.ShippingRepresentativeId == userId)
-                .Where(o => o.CreationDate.Year == today.Year)
-                .GroupBy(o => o.CreationDate.Month)
-                .Select(g => new
-                {
-                    Month = g.Key,
-                    TotalOrders = g.Count(),
-                    CompletedOrders = g.Count(o => o.OrderState == OrderState.Delivered)
-                })
-                .ToListAsync();
-
-            // Calculate average completion rate for target
-            var averageCompletionRate = yearlyPerformanceData.Any()
-                ? (int)yearlyPerformanceData
-                    .Where(d => d.TotalOrders > 0)
-                    .Average(d => (decimal)d.CompletedOrders / d.TotalOrders * 100)
-                : 0;
-
-            // Initialize MonthlyPerformance with all months
-            var monthlyPerformance = new Dictionary<int, MonthlyPerformanceData>();
+            // Calculate MonthlyPerformance for all months (1 to 12) of the current year
+            var monthlyPerformance = new Dictionary<string, MonthlyPerformanceData>();
             for (int month = 1; month <= 12; month++)
             {
-                monthlyPerformance[month] = new MonthlyPerformanceData
+                var monthStart = new DateTime(currentYear, month, 1);
+                var monthEnd = monthStart.AddMonths(1);
+
+                // Get order count for the specific month
+                var monthOrderCount = await query
+                    .Where(o => o.CreationDate >= monthStart && o.CreationDate < monthEnd)
+                    .CountAsync();
+
+                // Calculate percentage for the month
+                var percentage = totalOrdersAllTime > 0 ? (decimal)monthOrderCount / totalOrdersAllTime * 100 : 0;
+                monthlyPerformance[month.ToString()] = new MonthlyPerformanceData
                 {
-                    Value = 0,
-                    Trend = "neutral",
-                    Target = averageCompletionRate
-                };
-            }
-
-            // Calculate performance for each month
-            foreach (var monthData in yearlyPerformanceData)
-            {
-                var month = monthData.Month;
-                var totalOrders = monthData.TotalOrders;
-                var completedOrders = monthData.CompletedOrders;
-
-                // Calculate performance value as percentage of completed orders
-                var performanceValue = totalOrders > 0
-                    ? (int)((decimal)completedOrders / totalOrders * 100)
-                    : 0;
-
-                // Determine trend by comparing with previous month
-                string trend = month == 1 ? "neutral" : "neutral";
-                if (month > 1)
-                {
-                    var previousMonthData = yearlyPerformanceData.FirstOrDefault(p => p.Month == month - 1);
-                    var previousPerformance = previousMonthData?.TotalOrders > 0
-                        ? (decimal)previousMonthData.CompletedOrders / previousMonthData.TotalOrders * 100
-                        : 0;
-                    trend = performanceValue > previousPerformance ? "up" : performanceValue < previousPerformance ? "down" : "neutral";
-                }
-
-                monthlyPerformance[month] = new MonthlyPerformanceData
-                {
-                    Value = performanceValue,
-                    Trend = trend,
-                    Target = averageCompletionRate
+                    Value = Math.Round(percentage, 2)
                 };
             }
 

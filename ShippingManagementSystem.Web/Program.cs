@@ -21,11 +21,13 @@ using ShippingManagementSystem.Application.Helper;
 
 #endregion
 
+
 #region Create Builder
 
 var builder = WebApplication.CreateBuilder(args);
 
 #endregion
+
 
 #region Services
 
@@ -238,11 +240,13 @@ builder.Services.AddSwaggerGen(option =>
 
 #endregion
 
+
 #region Build Application
 
 var app = builder.Build();
 
 #endregion
+
 
 #region Check Environment
 
@@ -261,6 +265,7 @@ app.UseSwaggerUI(options =>
 });
 
 #endregion
+
 
 #region Middleware
 

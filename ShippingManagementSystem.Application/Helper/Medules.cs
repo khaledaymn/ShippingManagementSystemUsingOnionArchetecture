@@ -18,10 +18,10 @@
    
         public static class Branches
         {
-            public const string View = "Permission.Branches.View";
-            public const string Create = "Permission.Branches.Create";
-            public const string Edit = "Permission.Branches.Edit";
-            public const string Delete = "Permission.Branches.Delete";
+            public const string View = "Permission.Branchs.View";
+            public const string Create = "Permission.Branchs.Create";
+            public const string Edit = "Permission.Branchs.Edit";
+            public const string Delete = "Permission.Branchs.Delete";
         }
 
         public static class ChargeTypes
@@ -56,7 +56,7 @@
             public const string Delete = "Permission.Governorates.Delete";
         }
 
-        public static class Permissions
+    public static class Permissions
         {
             public const string View = "Permission.Permissions.View";
             public const string Create = "Permission.Permissions.Create";
@@ -82,10 +82,10 @@
 
         public static class ShippingRepresentatives
         {
-            public const string View = "Permission.ShippingRepresentatives.View";
-            public const string Create = "Permission.ShippingRepresentatives.Create";
-            public const string Edit = "Permission.ShippingRepresentatives.Edit";
-            public const string Delete = "Permission.ShippingRepresentatives.Delete";
+            public const string View = "Permission.Delivary.View";
+            public const string Create = "Permission.Delivary.Create";
+            public const string Edit = "Permission.Delivary.Edit";
+            public const string Delete = "Permission.Delivary.Delete";
         }
 
         public static class RejectedReasons
