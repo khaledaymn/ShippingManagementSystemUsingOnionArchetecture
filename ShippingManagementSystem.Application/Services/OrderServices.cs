@@ -47,7 +47,6 @@ namespace ShippingManagementSystem.Application.Services
 
         #endregion
 
-
         #region Get Order By Id
         public async Task<OrderDTO?> GetOrderByIdAsync(int id)
         {
@@ -69,7 +68,6 @@ namespace ShippingManagementSystem.Application.Services
 
         #endregion
 
-
         #region Get Orders By Status
         public async Task<List<OrderDTO>> GetOrdersByStatusAsync(string status)
         {
@@ -87,7 +85,6 @@ namespace ShippingManagementSystem.Application.Services
         }
 
         #endregion
-
 
         #region Get Products By Order Id
 
@@ -119,7 +116,6 @@ namespace ShippingManagementSystem.Application.Services
         }
 
         #endregion
-
 
         #region Create Order
         public async Task<(bool IsSuccess, string Message)> CreateOrderAsync(CreateOrderDTO orderDTO)
@@ -201,7 +197,6 @@ namespace ShippingManagementSystem.Application.Services
 
         #endregion
 
-
         #region Assign Order To Delivary
         public async Task<(bool IsSuccess, string Message)> AssignOrderToDelivaryAsync(int id, AssignOrderToDelivaryDTO statusDTO)
         {
@@ -251,7 +246,6 @@ namespace ShippingManagementSystem.Application.Services
 
         #endregion
 
-
         #region Update Order Status
         public async Task<(bool IsSuccess, string Message)> UpdateOrderStatusAsync(int id, UpdateOrderStatusDTO statusDTO)
         {
@@ -293,7 +287,6 @@ namespace ShippingManagementSystem.Application.Services
 
         #endregion
 
-
         #region Delete Order
         public async Task<(bool IsSuccess, string Message)> DeleteOrderAsync(int id)
         {
@@ -321,7 +314,6 @@ namespace ShippingManagementSystem.Application.Services
         }
 
         #endregion
-
 
         #region Helper Methods
 
@@ -449,7 +441,6 @@ namespace ShippingManagementSystem.Application.Services
         }
 
         #endregion
-
 
         #region Add Range
 

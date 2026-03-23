@@ -4,21 +4,32 @@ namespace ShippingManagementSystem.Domain.Specifications.CustomSpecification.Shi
 {
     public class ShippingRepresentativeParams
     {
-        private const int MaxPageSize = 10;
-        private int _pageSize = 100;
-        
+        /// <summary> Current results page. </summary>
+        /// <example>1</example>
         public int PageIndex { get; set; } = 1;
-        
-        public int PageSize
-        {
-            get => _pageSize;
-            set => _pageSize = (value > MaxPageSize) ? MaxPageSize : value;
-        }
 
+        /// <summary> Items per page (Maximum 10). </summary>
+        /// <example>10</example>
+        public int PageSize { get; set; } = 10;
+
+        /// <summary> Search by Name, Email, or Phone. </summary>
+        /// <example>Mahmoud</example>
         public string? Search { get; set; }
+
+        /// <summary> Filter by associated Branch name. </summary>
+        /// <example>Cairo Main</example>
         public string? Branch { get; set; }
+
+        /// <summary> Filter by account activity status. </summary>
+        /// <example>true</example>
         public bool? IsActive { get; set; }
+
+        /// <summary> Sort expression (e.g., 'name_asc', 'hiring_desc'). </summary>
+        /// <example>hiring_desc</example>
         public string? Sort { get; set; }
+
+        /// <summary> Filter by specific Governorate ID. </summary>
+        /// <example>3</example>
         public int? GovernorateId { get; set; }
     }
 }

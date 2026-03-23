@@ -131,7 +131,6 @@ namespace ShippingManagementSystem.Domain.Services
 
         #endregion
 
-
         #region Get All 
 
         public async Task<PaginationResponse<EmployeeDTO>> GetAllEmployeesAsync(EmployeeParams param)
@@ -174,7 +173,6 @@ namespace ShippingManagementSystem.Domain.Services
 
         #endregion
 
-
         #region Get Employee By Id
         public async Task<EmployeeDTO?> GetEmployeeByIdAsync(string id)
         {
@@ -214,7 +212,6 @@ namespace ShippingManagementSystem.Domain.Services
         }
 
         #endregion
-
 
         #region Update Employee
         public async Task<(bool IsSuccess, string Message)> UpdateEmployeeAsync(UpdateEmployeeDTO dto)
@@ -308,7 +305,6 @@ namespace ShippingManagementSystem.Domain.Services
         }
 
         #endregion
-
 
         #region Delete Employee
 

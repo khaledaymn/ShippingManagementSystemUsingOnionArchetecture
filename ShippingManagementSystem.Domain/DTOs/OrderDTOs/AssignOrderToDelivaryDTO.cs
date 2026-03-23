@@ -9,9 +9,14 @@ namespace ShippingManagementSystem.Domain.DTOs.OrderDTOs
 {
     public class AssignOrderToDelivaryDTO
     {
-        [Required(ErrorMessage = "Order status is required")]
+        /// <summary> Target state (Usually 'DeliveredToTheRepresentative'). </summary>
+        /// <example>DeliveredToTheRepresentative</example>
+        [Required]
         public string OrderState { get; set; } = string.Empty;
-        [Required(ErrorMessage = "ShippigRepresentativeId is required")]
+
+        /// <summary> User ID of the Shipping Representative. </summary>
+        /// <example>usr_rep_55</example>
+        [Required]
         public string ShippingRepresentativeId { get; set; }
     }
 }

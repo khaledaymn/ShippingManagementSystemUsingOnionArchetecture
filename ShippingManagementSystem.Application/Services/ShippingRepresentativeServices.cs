@@ -89,7 +89,6 @@ namespace ShippingManagementSystem.Application.Services
         }
         #endregion
 
-
         #region Get All ShippingRepresentatives
         public async Task<PaginationResponse<ShippingRepresentativeDTO>> GetAllShippingRepresentativesAsync(ShippingRepresentativeParams param)
         {
@@ -124,7 +123,6 @@ namespace ShippingManagementSystem.Application.Services
         }
         #endregion
 
-
         #region Get ShippingRepresentative By Id
         public async Task<ShippingRepresentativeDTO?> GetShippingRepresentativeByIdAsync(string id)
         {
@@ -152,7 +150,6 @@ namespace ShippingManagementSystem.Application.Services
             };
         }
         #endregion
-
 
         #region Update ShippingRepresentative
         public async Task<(bool IsSuccess, string Message)> UpdateShippingRepresentativeAsync(UpdateShippingRepresentativeDTO dto)
@@ -218,7 +215,6 @@ namespace ShippingManagementSystem.Application.Services
 
         }
         #endregion
-
 
         #region Delete ShippingRepresentative
         public async Task<(bool IsSuccess, string Message)> DeleteShippingRepresentativeAsync(string id)

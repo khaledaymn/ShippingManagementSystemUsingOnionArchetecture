@@ -2,23 +2,53 @@
 {
     public class DashboardSummaryDTO
     {
-        // Monthly Statistics from stats-grid
-        public int AssignedOrders { get; set; } // Total orders assigned to the user
-        public int CompletedOrders { get; set; } // Orders with state "Delivered"
-        public int PendingOrders { get; set; } // Sum of states like "Pendding", "DeliveredToTheRepresentative", etc.
-        public decimal EfficiencyRate { get; set; } // Percentage of completed orders
-        public int ChangeAssigned { get; set; } // Change in Assigned Orders (e.g., +50)
-        public int ChangeCompleted { get; set; } // Change in Completed Orders (e.g., +80)
-        public int ChangePending { get; set; } // Change in Pending Orders (e.g., -30)
-        public decimal ChangeEfficiency { get; set; } // Change in Efficiency Rate (e.g., +2.1%)
+        /// <summary> Total number of orders assigned to the specific user/context this month. </summary>
+        /// <example>150</example>
+        public int AssignedOrders { get; set; }
+        /// <summary> Number of orders successfully reached 'Delivered' state this month. </summary>
+        /// <example>120</example>
+        public int CompletedOrders { get; set; }
+        public int PendingOrders { get; set; }
 
-        // Financial and General Stats
-        public int TotalOrders { get; set; } // Total orders from the service
-        public decimal TotalRevenue { get; set; } // Sum of AmountReceived
-        public decimal AverageWeight { get; set; } // Average TotalWeight
-        public decimal AverageChargePrice { get; set; } // Average ChargePrice
+        /// <summary> Number of active orders currently in transit or awaiting action (Pending/Representative). </summary>
+        /// <example>30</example>
+        /// <summary> Success rate calculated as (Completed / Total) * 100. </summary>
+        /// <example>80.0</example>
+        public decimal EfficiencyRate { get; set; }
 
-        // Order States Distribution (for table and donut chart)
+        /// <summary> Numerical difference in assigned orders compared to the previous month. </summary>
+        /// <example>+15</example>
+        public int ChangeAssigned { get; set; }
+
+        /// <summary> Numerical difference in completed orders compared to the previous month. </summary>
+        /// <example>+10</example>
+        public int ChangeCompleted { get; set; }
+
+        /// <summary> Numerical difference in pending orders compared to the previous month. </summary>
+        /// <example>-5</example>
+        public int ChangePending { get; set; }
+
+        /// <summary> Percentage shift in efficiency compared to the previous month. </summary>
+        /// <example>2.5</example>
+        public decimal ChangeEfficiency { get; set; }
+        // <summary> Grand total of all orders currently processed by the service. </summary>
+        public int TotalOrders { get; set; }
+
+        /// <summary> Aggregate monetary value received from delivered shipments. </summary>
+        /// <example>45000.75</example>
+        public decimal TotalRevenue { get; set; }
+
+        /// <summary> The average weight per shipment in this period. </summary>
+        /// <example>3.2</example>
+        public decimal AverageWeight { get; set; }
+
+        /// <summary> The average service charge price calculated across the current data set. </summary>
+        /// <example>55.0</example>
+        public decimal AverageChargePrice { get; set; }
+        /// <summary> 
+    /// Breakdown of orders by their lifecycle state. 
+    /// Keys correspond to 'OrderState' Enum names. Used for Donut/Bar charts.
+    /// </summary>
         public Dictionary<string, int> OrdersByState { get; set; } = new Dictionary<string, int>
         {
             { "New", 0 },
@@ -34,7 +64,10 @@
             { "RejectedWithoutPayment", 0 }
         };
 
-        // Payment Types Distribution (for table)
+        /// <summary> 
+        /// Breakdown of orders by payment method (e.g., Cash, Advance). 
+        /// Used for payment analysis tables.
+        /// </summary>
         public Dictionary<string, int> OrdersByPaymentType { get; set; } = new Dictionary<string, int>
         {
             { "CashOnDelivery", 0 },
@@ -42,15 +75,20 @@
             { "ExchangeOrder", 0 }
         };
 
-        // Monthly Performance (for the current month, representing order state percentages)
+        /// <summary> 
+        /// Performance snapshots for each month of the current year (1-12). 
+        /// Represents the percentage of total orders contributed by each month.
+        /// </summary>
         public Dictionary<string, MonthlyPerformanceData> MonthlyPerformance { get; set; } = new Dictionary<string, MonthlyPerformanceData>();
 
-        // Order Status Distribution (for donut chart - simplified total)
+        /// <summary> The mathematical sum of all orders categorized in the status distribution chart. </summary>
         public int OrderStatusDistributionTotal { get; set; } // Total for donut chart (e.g., 570)
     }
 
     public class MonthlyPerformanceData
     {
-        public decimal Value { get; set; } // Percentage value (0-100%)
+        /// <summary> The calculated percentage value (0-100) for a specific month. </summary>
+        /// <example>12.5</example>
+        public decimal Value { get; set; }
     }
 }

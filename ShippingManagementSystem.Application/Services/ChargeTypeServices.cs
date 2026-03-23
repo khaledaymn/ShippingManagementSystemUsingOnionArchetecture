@@ -49,7 +49,6 @@ namespace ShippingManagementSystem.Application.Services
                 throw new Exception("Error retrieving charge types", ex);
             }
         }
-
         public async Task<ChargeTypeDTO?> GetChargeTypeByIdAsync(int id)
         {
             try
@@ -74,7 +73,6 @@ namespace ShippingManagementSystem.Application.Services
                 throw new Exception($"Error retrieving charge type with id {id}", ex);
             }
         }
-
         public async Task<(bool IsSuccess, string Message)> CreateChargeTypeAsync(CreateChargeTypeDTO chargeTypeDTO)
         {
             try
@@ -103,7 +101,6 @@ namespace ShippingManagementSystem.Application.Services
                 return (false, $"Error creating charge type: {ex.Message}");
             }
         }
-
         public async Task<(bool IsSuccess, string Message)> UpdateChargeTypeAsync(int id, ChargeTypeDTO chargeTypeDTO)
         {
             try
@@ -139,7 +136,6 @@ namespace ShippingManagementSystem.Application.Services
                 return (false, $"Error updating charge type: {ex.Message}");
             }
         }
-
         public async Task<(bool IsSuccess, string Message)> DeleteChargeTypeAsync(int id)
         {
             try

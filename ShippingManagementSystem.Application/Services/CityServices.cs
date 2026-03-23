@@ -21,6 +21,7 @@ namespace ShippingManagementSystem.Application.Services
             _unitOfWork = unitOfWork;
             _context = context;
         }
+
         public async Task<PaginationResponse<CityDTO>> GetAllCitiesAsync(CityParams param)
         {
             try
@@ -51,6 +52,7 @@ namespace ShippingManagementSystem.Application.Services
                 throw new Exception("Error retrieving cities", ex);
             }
         }
+     
         public async Task<CityDTO?> GetCityByIdAsync(int id)
         {
             try
@@ -76,6 +78,7 @@ namespace ShippingManagementSystem.Application.Services
                 throw new Exception($"Error retrieving city with id {id}", ex);
             }
         }
+      
         public async Task<(bool IsSuccess, string Message)> CreateCityAsync(CreateCityDTO cityDTO)
         {
             try
@@ -104,6 +107,7 @@ namespace ShippingManagementSystem.Application.Services
                 return (false, $"Error creating city: {ex.Message}");
             }
         }
+       
         public async Task<(bool IsSuccess, string Message)> EditCityAsync(EditCityDTO cityDTO)
         {
             try
@@ -149,6 +153,7 @@ namespace ShippingManagementSystem.Application.Services
                 return (false, $"Error updating city: {ex.Message}");
             }
         }
+       
         public async Task<(bool IsSuccess, string Message)> DeleteCityAsync(int id)
         {
             try

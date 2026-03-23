@@ -55,7 +55,6 @@ namespace ShippingManagementSystem.Application.Services
 
         #endregion
 
-
         #region Get Branch By Id
         public async Task<GetBranchDTO?> GetBranchByIdAsync(int id)
         {
@@ -85,7 +84,6 @@ namespace ShippingManagementSystem.Application.Services
 
         #endregion
 
-
         #region Create Branch
         public async Task<(bool IsSuccess, string Message)> CreateBranchAsync(CreateBranchDTO branchDTO)
         {
@@ -112,7 +110,6 @@ namespace ShippingManagementSystem.Application.Services
         }
 
         #endregion
-
 
         #region Update Branch
         public async Task<(bool IsSuccess, string Message)> UpdateBranchAsync(int id, BranchDTO branchDTO)
@@ -146,7 +143,6 @@ namespace ShippingManagementSystem.Application.Services
         }
 
         #endregion
-
 
         #region Change Status of Branch
         public async Task<(bool IsSuccess, string Message)> DeleteBranchAsync(int id)
@@ -199,7 +195,6 @@ namespace ShippingManagementSystem.Application.Services
             }
         }
 
-        
 
     }
 } 

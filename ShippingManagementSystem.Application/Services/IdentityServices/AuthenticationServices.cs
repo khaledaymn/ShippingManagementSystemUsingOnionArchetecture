@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ShippingManagementSystem.Application.DTOs.AuthenticationDTOs;
@@ -7,20 +6,15 @@ using ShippingManagementSystem.Application.Helper;
 using ShippingManagementSystem.Application.Settings;
 using ShippingManagementSystem.Application.UnitOfWork;
 using ShippingManagementSystem.Domain.DTOs.AuthenticationDTOs;
-using ShippingManagementSystem.Domain.DTOs.EmployeeDTOs;
 using ShippingManagementSystem.Domain.Entities;
 using ShippingManagementSystem.Domain.Interfaces;
 using ShippingManagementSystem.Domain.Specifications.CustomSpecification.EmployeeSpecification;
 using ShippingManagementSystem.Domain.Specifications.CustomSpecification.ShippingRepresentativeSpecification;
 using ShippingManagementSystem.Domain.UserTypes;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace ShippingManagementSystem.Application.Services.IdentityServices
@@ -128,7 +122,6 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
 
         #endregion
 
-
         #region Forget Password
 
         public async Task<string> ForgetPassword(ForgetPasswordDTO dto)
@@ -155,7 +148,6 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
         }
 
         #endregion
-
 
         #region Reset Password
         public async Task<string> ResetPassword(ResetPasswordDTO dto)
@@ -190,7 +182,6 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
 
 
         #endregion
-
 
         #region Change Password
         public async Task<string> ChangePassword(ChangePasswordDTO dto)
@@ -234,7 +225,6 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
 
         #endregion
 
-
         #region Craete JWT Token
 
         private async Task<JwtSecurityToken> CreateJWTToken(ApplicationUser user)
@@ -276,7 +266,6 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
         }
 
         #endregion
-
 
         #region Get User By Id
         public async Task<object> GetSpecificUser(string role, string id)
@@ -368,7 +357,6 @@ namespace ShippingManagementSystem.Application.Services.IdentityServices
         }
   
         #endregion
-
 
         #region UpdateUserData
         public async Task<(bool IsSuccess, string Message)> UpdateUserData(SpecificUserDataDTO dto)

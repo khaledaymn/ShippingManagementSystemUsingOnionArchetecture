@@ -119,7 +119,6 @@ namespace ShippingManagementSystem.Application.Services
         }
         #endregion
 
-
         #region Get All Merchants
 
         public async Task<PaginationResponse<MerchantDTO>> GetAllMerchantsAsync(MerchantParams param)
@@ -181,7 +180,6 @@ namespace ShippingManagementSystem.Application.Services
                 ;
         }
         #endregion
-
 
         #region Get Merchant By Id
         public async Task<MerchantDTO?> GetMerchantByIdAsync(string id)
@@ -247,7 +245,6 @@ namespace ShippingManagementSystem.Application.Services
             return null;
         }
         #endregion
-
 
         #region Update Merchant
         public async Task<(bool IsSuccess, string Message)> UpdateMerchantAsync(UpdateMerchantDTO dto)
@@ -348,7 +345,6 @@ namespace ShippingManagementSystem.Application.Services
         }
 
         #endregion
-
 
         #region Delete Merchant
         public async Task<(bool IsSuccess, string Message)> DeleteMerchantAsync(string id)
